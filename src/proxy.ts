@@ -1,0 +1,166 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { NextRequest, NextResponse } from "next/server";
+import { RoleType } from "./app/constants/role";
+import { getServerEnv } from "./lib/env";
+
+import {
+    getDefaultDashboardRoute,
+    getRouteOwner,
+    isAuthRoute,
+    UserRole,
+} from "./lib/authUtils";
+import { jwtUtils } from "./lib/jwtUtils";
+
+type AuthUserInfo = {
+    email: string;
+    needPasswordChange: boolean;
+    emailVerified: boolean;
+    role?: string;
+};
+
+const normalizeRole = (role: unknown): RoleType | null => {
+    if (role === "ADMIN") return "ADMIN";
+    if (role === "TUTOR") return "TUTOR";
+    if (role === "STUDENT" || role === "STUDENT" || role === "STUDENT") return "STUDENT";
+    return null;
+};
+
+const getFallbackDashboardRoute = (role: RoleType | null) => {
+    return getDefaultDashboardRoute((role ?? "USER") as UserRole);
+};
+
+const resolveDashboardAliasOwner = (pathname: string): RoleType | null => {
+    if (pathname.startsWith("/admin/dashboard")) return "ADMIN";
+    if (pathname.startsWith("/tutor/dashboard")) return "PROVIDER";
+    if (pathname.startsWith("/student/dashboard") || pathname.startsWith("/client/dashboard")) return "USER";
+    return null;
+};
+
+const getUserInfoFromApi = async (
+    cookieHeader?: string,
+    accessToken?: string,
+    sessionToken?: string
+): Promise<AuthUserInfo | null> => {
+    try {
+        const serverEnv = getServerEnv();
+        const fallbackCookieParts: string[] = [];
+        if (accessToken) fallbackCookieParts.push(`accessToken=${accessToken}`);
+        if (sessionToken) fallbackCookieParts.push(`better-auth.session_token=${sessionToken}`);
+
+        const finalCookieHeader = cookieHeader || fallbackCookieParts.join("; ");
+
+        if (!finalCookieHeader) {
+            return null;
+        }
+
+        const response = await fetch(`${serverEnv.BASE_API_URL}/auth/me`, {
+            method: "GET",
+            headers: {
+                "Content-Type": "application/json",
+                Cookie: finalCookieHeader,
+                ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
+                ...(sessionToken ? { "x-session-token": sessionToken } : {}),
+            },
+            cache: "no-store",
+            // signal: AbortSignal.timeout(15000), // Increased to 15s to be totally safe against backend cold-start spin ups
+        });
+
+        if (!response.ok) {
+            return null;
+        }
+
+        const payload = await response.json();
+        return payload?.data ?? null;
+    } catch {
+        return null;
+    }
+};
+
+export async function proxy(request: NextRequest) {
+    try {
+        const serverEnv = getServerEnv();
+        const { pathname } = request.nextUrl;
+        const accessToken = request.cookies.get("accessToken")?.value;
+        const sessionToken = request.cookies.get("better-auth.session_token")?.value;
+        const rawCookieHeader = request.headers.get("cookie") || undefined;
+
+        const verifiedAccessToken = accessToken
+            ? jwtUtils.verifyToken(accessToken, serverEnv.JWT_ACCESS_SECRET)
+            : { success: false as const, data: null };
+
+        const isValidAccessToken = Boolean(verifiedAccessToken.success);
+        const decodedAccessToken = verifiedAccessToken.success ? verifiedAccessToken.data : null;
+        const authUserInfo = (accessToken || sessionToken)
+            ? await getUserInfoFromApi(rawCookieHeader, accessToken, sessionToken)
+            : null;
+        const userRole =
+            normalizeRole(decodedAccessToken?.role) ||
+            normalizeRole(authUserInfo?.role) ||
+            (sessionToken ? "USER" : null);
+        const isAuthenticated = isValidAccessToken || Boolean(authUserInfo) || Boolean(sessionToken);
+
+        const routeOwner = getRouteOwner(pathname);
+        const isAuth = isAuthRoute(pathname);
+        const dashboardAliasOwner = resolveDashboardAliasOwner(pathname);
+
+        // Logged-in users should not access login/register pages.
+        if (isAuth && isAuthenticated && pathname !== "/verify-email") {
+            return NextResponse.redirect(new URL(getFallbackDashboardRoute(userRole), request.url));
+        }
+
+        // Support legacy/role-prefixed dashboard URLs by redirecting to the unified /dashboard route.
+        if (dashboardAliasOwner) {
+            if (!isAuthenticated || !userRole) {
+                return NextResponse.redirect(new URL("/login", request.url));
+            }
+
+            if (dashboardAliasOwner !== userRole) {
+                return NextResponse.redirect(new URL(getFallbackDashboardRoute(userRole), request.url));
+            }
+
+            return NextResponse.redirect(new URL("/dashboard", request.url));
+        }
+
+        // Only allow /change-password route if needPasswordChange is true
+        if (pathname === "/change-password") {
+            if (!isAuthenticated) {
+                return NextResponse.redirect(new URL("/login", request.url));
+            }
+            return NextResponse.next();
+        }
+
+        // Public route.
+        if (routeOwner === null) {
+            return NextResponse.next();
+        }
+
+        // Protected route requires valid access token.
+        if (!isAuthenticated) {
+            return NextResponse.redirect(new URL("/login", request.url));
+        }
+
+        const userInfo = authUserInfo as any;
+        if (userInfo?.needPasswordChange && pathname !== "/change-password") {
+            return NextResponse.redirect(new URL("/change-password", request.url));
+        }
+
+        if (routeOwner === "COMMON") {
+            return NextResponse.next();
+        }
+
+        if ((routeOwner === "ADMIN" || routeOwner === "TUTOR" || routeOwner === "STUDENT") && routeOwner !== userRole) {
+            return NextResponse.redirect(new URL(getFallbackDashboardRoute(userRole as any), request.url));
+        }
+
+        return NextResponse.next();
+    } catch (error) {
+        console.error("Error in proxy middleware:", error);
+        return NextResponse.next();
+    }
+}
+
+export const config = {
+    matcher: [
+        "/((?!api|_next/static|_next/image|favicon.ico|sitemap.xml|robots.txt|.well-known).*)",
+    ],
+};
