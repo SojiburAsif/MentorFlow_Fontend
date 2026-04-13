@@ -139,7 +139,14 @@ export default async function TutorsPage({
               const tutorId = t.id ?? t.tutorId ?? t._id;
               const name = t.user?.name ?? t.name ?? "Tutor";
               const image = t.user?.image ?? t.image ?? "https://github.com/shadcn.png";
-              const category = safeCategoryName(t.category?.title ?? t.category?.name ?? t.categoryName);
+              const legacyCategory = safeCategoryName(t.category?.title ?? t.category?.name ?? t.categoryName);
+              const categories =
+                Array.isArray(t.categories)
+                  ? t.categories
+                      .map((x: any) => safeCategoryName(x?.category?.name))
+                      .filter(Boolean)
+                      .slice(0, 4)
+                  : [];
               const price = t.price;
               const rating = t.rating;
               const slotsCount = Array.isArray(t.tutorSlots) ? t.tutorSlots.length : undefined;
@@ -162,7 +169,7 @@ export default async function TutorsPage({
                         <div className="min-w-0">
                           <p className="font-black truncate text-base group-hover:text-blue-600 transition-colors">{name}</p>
                           <p className="text-xs text-muted-foreground mt-0.5 truncate">
-                            {category ? category : "Mentor"}
+                            {categories.length > 0 ? categories.join(" · ") : legacyCategory ? legacyCategory : "Mentor"}
                           </p>
                         </div>
                       </div>
@@ -178,6 +185,15 @@ export default async function TutorsPage({
                     </div>
 
                     <div className="mt-4 flex flex-wrap gap-2 text-xs">
+                      {categories.length > 0 && (
+                        <div className="w-full flex flex-wrap gap-2">
+                          {categories.map((c: string) => (
+                            <span key={c} className="inline-flex items-center px-2 py-1 rounded-full border bg-blue-600/10 text-blue-700 dark:text-blue-300 border-blue-500/20 font-black">
+                              {c}
+                            </span>
+                          ))}
+                        </div>
+                      )}
                       {rating != null && (
                         <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full border bg-muted/30">
                           <Star className="w-3 h-3 text-amber-500" />

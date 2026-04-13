@@ -8,13 +8,22 @@ import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { Loader2, Camera, User, Phone, BookOpen, GraduationCap, DollarSign, PenTool } from "lucide-react";
+import { Loader2, Camera, User, Phone, BookOpen, GraduationCap, DollarSign, PenTool, Layers, X } from "lucide-react";
 import { uploadToImgbb } from "@/lib/imageUpload.utils";
 
 export default function UpdateProfileForm({ user, onUpdate }: { user: any, onUpdate?: (data: any) => void }) {
   const [isLoading, setIsLoading] = useState(false);
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [allCategories, setAllCategories] = useState<any[]>([]);
+  const [categoryIds, setCategoryIds] = useState<string[]>(() => {
+    const fromNew = Array.isArray(user?.tutorProfile?.categories)
+      ? user.tutorProfile.categories.map((x: any) => x?.categoryId ?? x?.category?.id).filter(Boolean)
+      : [];
+    const fromLegacy = user?.tutorProfile?.categoryId ? [user.tutorProfile.categoryId] : [];
+    const merged = Array.from(new Set([...(fromNew as string[]), ...(fromLegacy as string[])])).slice(0, 4);
+    return merged;
+  });
 
   const { register, handleSubmit } = useForm({
     defaultValues: {
@@ -37,6 +46,32 @@ export default function UpdateProfileForm({ user, onUpdate }: { user: any, onUpd
       return () => URL.revokeObjectURL(url);
     }
   }, [imageFile]);
+
+  // Load categories for tutor multi-select
+  useEffect(() => {
+    if (user.role !== "TUTOR") return;
+    (async () => {
+      try {
+        const r = await fetch("/api/categories", { cache: "no-store" });
+        const j = await r.json().catch(() => ({ success: false, message: "Invalid response" }));
+        if (!r.ok || !j.success) return;
+        setAllCategories(Array.isArray(j.data) ? j.data : []);
+      } catch {
+        // ignore
+      }
+    })();
+  }, [user.role]);
+
+  const toggleCategory = (id: string) => {
+    setCategoryIds((prev) => {
+      if (prev.includes(id)) return prev.filter((x) => x !== id);
+      if (prev.length >= 4) {
+        toast.error("You can select up to 4 categories");
+        return prev;
+      }
+      return [...prev, id];
+    });
+  };
 
   const onSubmit = async (data: any) => {
     setIsLoading(true);
@@ -62,7 +97,8 @@ export default function UpdateProfileForm({ user, onUpdate }: { user: any, onUpd
 
       const res = await updateMyProfileAction({ 
         ...cleanData, 
-        ...(finalImgUrl ? { image: finalImgUrl } : {}) 
+        ...(finalImgUrl ? { image: finalImgUrl } : {}),
+        ...(user.role === "TUTOR" ? { categoryIds } : {})
       });
 
       if (res.success) {
@@ -117,6 +153,46 @@ export default function UpdateProfileForm({ user, onUpdate }: { user: any, onUpd
         {/* Conditional Role Based Fields */}
         {user.role === "TUTOR" && (
           <>
+            <div className="space-y-2 md:col-span-2">
+              <Label className="flex items-center gap-2 text-slate-600 dark:text-slate-400">
+                <Layers className="w-4 h-4" /> Categories (up to 4)
+              </Label>
+              <div className="rounded-2xl border bg-slate-50/50 dark:bg-slate-900/50 p-3">
+                {allCategories.length === 0 ? (
+                  <p className="text-xs text-slate-500">Categories not loaded yet.</p>
+                ) : (
+                  <div className="flex flex-wrap gap-2">
+                    {allCategories.map((c: any) => {
+                      const id = String(c.id);
+                      const active = categoryIds.includes(id);
+                      return (
+                        <button
+                          key={id}
+                          type="button"
+                          onClick={() => toggleCategory(id)}
+                          className={[
+                            "h-9 px-3 rounded-xl border text-xs font-black inline-flex items-center gap-2 transition-colors",
+                            active
+                              ? "bg-blue-600 text-white border-blue-700"
+                              : "bg-white/60 dark:bg-black/20 border-slate-200/40 dark:border-slate-800 hover:bg-blue-600/10 hover:border-blue-600/30",
+                          ].join(" ")}
+                        >
+                          {c.name}
+                          {active && <X className="h-3.5 w-3.5 opacity-80" />}
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
+
+                {categoryIds.length > 0 && (
+                  <p className="text-[11px] text-slate-500 mt-3">
+                    Selected: <span className="font-bold">{categoryIds.length}</span>/4
+                  </p>
+                )}
+              </div>
+            </div>
+
             <div className="space-y-2 md:col-span-2">
               <Label className="flex items-center gap-2 text-slate-600 dark:text-slate-400">
                 <PenTool className="w-4 h-4" /> Bio

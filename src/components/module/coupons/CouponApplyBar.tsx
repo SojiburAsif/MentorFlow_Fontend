@@ -22,6 +22,39 @@ export default function CouponApplyBar({
   const [pending, startTransition] = useTransition();
   const [code, setCode] = useState("");
   const [applied, setApplied] = useState<AppliedCoupon | null>(null);
+  const [errorText, setErrorText] = useState<string>("");
+
+  const humanizeError = (raw: unknown, status?: number) => {
+    const msg = String(raw ?? "").trim();
+    const low = msg.toLowerCase();
+
+    if (status === 401 || low.includes("unauthorized") || low.includes("login")) {
+      return "You are not logged in or your session expired. Please log in again.";
+    }
+
+    if (
+      status === 503 ||
+      low.includes("server unreachable") ||
+      low.includes("failed to fetch") ||
+      low.includes("fetch failed") ||
+      low.includes("networkerror")
+    ) {
+      return "invalid coupon code";
+    }
+
+    if (low.includes("invalid coupon code") || low.includes("invalid coupon")) {
+      return "This coupon code is not valid. Please check and try again.";
+    }
+    if (low.includes("expired")) {
+      return "This coupon has expired.";
+    }
+    if (low.includes("usage limit")) {
+      return "This coupon has reached its usage limit.";
+    }
+
+    // fallback
+    return msg || "Failed to apply coupon. Please try again.";
+  };
 
   const priceText = useMemo(() => {
     const p = applied?.finalPrice ?? originalPrice;
@@ -30,9 +63,14 @@ export default function CouponApplyBar({
 
   const apply = () => {
     const c = code.trim();
-    if (!c) return toast.error("Enter a coupon code");
+    if (!c) {
+      setErrorText("Enter a coupon code");
+      toast.error("Enter a coupon code");
+      return;
+    }
     startTransition(async () => {
       try {
+        setErrorText("");
         const r = await fetch("/api/coupons/apply", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -40,7 +78,17 @@ export default function CouponApplyBar({
         });
         const j = await r.json().catch(() => ({ success: false, message: "Invalid response" }));
         if (!r.ok || !j.success) {
-          toast.error(j.message || j.error || "Invalid coupon");
+          const rawMsg =
+            j?.message ||
+            j?.error ||
+            j?.errorSources?.[0]?.message ||
+            (r.status === 401 ? "Please login again" : "") ||
+            "Invalid coupon";
+          const msg = humanizeError(rawMsg, r.status);
+          setApplied(null);
+          onAppliedChange(null);
+          setErrorText(String(msg));
+          toast.error(String(msg));
           return;
         }
         const d = j.data ?? {};
@@ -53,9 +101,15 @@ export default function CouponApplyBar({
         };
         setApplied(next);
         onAppliedChange(next);
+        setErrorText("");
         toast.success("Coupon applied");
-      } catch {
-        toast.error("Failed to apply coupon");
+      } catch (e: unknown) {
+        const raw = e instanceof Error ? e.message : "Failed to apply coupon";
+        const msg = humanizeError(raw);
+        setApplied(null);
+        onAppliedChange(null);
+        setErrorText(msg);
+        toast.error(msg);
       }
     });
   };
@@ -64,6 +118,7 @@ export default function CouponApplyBar({
     setApplied(null);
     onAppliedChange(null);
     setCode("");
+    setErrorText("");
   };
 
   return (
@@ -101,22 +156,28 @@ export default function CouponApplyBar({
           </button>
         </div>
       ) : (
-        <div className="mt-3 flex gap-2">
-          <input
-            value={code}
-            onChange={(e) => setCode(e.target.value)}
-            placeholder="Coupon code (e.g. EID20)"
-            className="flex-1 h-10 px-3 rounded-xl border bg-background text-sm outline-none focus:ring-2 focus:ring-blue-500/20"
-            disabled={pending}
-          />
-          <button
-            type="button"
-            onClick={apply}
-            disabled={pending}
-            className="h-10 px-4 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-sm font-black disabled:opacity-60"
-          >
-            {pending ? "Checking..." : "Apply"}
-          </button>
+        <div className="mt-3">
+          <div className="flex gap-2">
+            <input
+              value={code}
+              onChange={(e) => {
+                setCode(e.target.value);
+                if (errorText) setErrorText("");
+              }}
+              placeholder="Coupon code (e.g. EID20)"
+              className="flex-1 h-10 px-3 rounded-xl border bg-background text-sm outline-none focus:ring-2 focus:ring-blue-500/20"
+              disabled={pending}
+            />
+            <button
+              type="button"
+              onClick={apply}
+              disabled={pending}
+              className="h-10 px-4 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-sm font-black disabled:opacity-60"
+            >
+              {pending ? "Checking..." : "Apply"}
+            </button>
+          </div>
+          {errorText ? <p className="mt-2 text-xs font-semibold text-rose-500">{errorText}</p> : null}
         </div>
       )}
     </div>

@@ -50,6 +50,17 @@ export default function BookingDetailsDialog({ booking }: { booking: any }) {
             <p className="text-sm font-semibold break-all">{booking?.transactionId ?? "—"}</p>
           </div>
           <div className="rounded-xl border bg-black/5 p-3">
+            <p className="text-xs text-slate-500">Amount paid</p>
+            <p className="text-sm font-semibold">
+              {Number.isFinite(Number(booking?.paidAmount)) ? `৳${Number(booking.paidAmount).toLocaleString()}` : "—"}
+            </p>
+            {Number.isFinite(Number(booking?.discountAmount)) && Number(booking.discountAmount) > 0 ? (
+              <p className="text-xs text-slate-500 mt-1">
+                Discount: ৳{Number(booking.discountAmount).toLocaleString()}
+              </p>
+            ) : null}
+          </div>
+          <div className="rounded-xl border bg-black/5 p-3">
             <p className="text-xs text-slate-500">Date & time</p>
             <p className="text-sm font-semibold">{startLabel}</p>
           </div>

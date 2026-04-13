@@ -21,19 +21,38 @@ const formatEnvErrors = (issues: { path: PropertyKey[]; message: string }[]) => 
     .join("\n");
 };
 
-const parsedPublic = publicEnvSchema.safeParse({
-  NEXT_PUBLIC_API_BASE_URL: process.env.NEXT_PUBLIC_API_BASE_URL,
-  NEXT_PUBLIC_APP_NAME: process.env.NEXT_PUBLIC_APP_NAME,
-  NEXT_PUBLIC_APP_ORIGIN: process.env.NEXT_PUBLIC_APP_ORIGIN,
-  NEXT_PUBLIC_IIMGBB_KEY: process.env.NEXT_PUBLIC_IIMGBB_KEY,
-});
+type PublicEnv = z.infer<typeof publicEnvSchema>;
+let cachedPublicEnv: PublicEnv | null = null;
 
-if (!parsedPublic.success) {
-  const formattedErrors = formatEnvErrors(parsedPublic.error.issues);
-  throw new Error(`Invalid public environment variables:\n${formattedErrors}`);
-}
+export const getPublicEnv = (): PublicEnv => {
+  if (cachedPublicEnv) return cachedPublicEnv;
 
-export const publicEnv = parsedPublic.data;
+  const parsedPublic = publicEnvSchema.safeParse({
+    NEXT_PUBLIC_API_BASE_URL: process.env.NEXT_PUBLIC_API_BASE_URL,
+    NEXT_PUBLIC_APP_NAME: process.env.NEXT_PUBLIC_APP_NAME,
+    NEXT_PUBLIC_APP_ORIGIN: process.env.NEXT_PUBLIC_APP_ORIGIN,
+    NEXT_PUBLIC_IIMGBB_KEY: process.env.NEXT_PUBLIC_IIMGBB_KEY,
+  });
+
+  if (!parsedPublic.success) {
+    // Don't crash the entire app (including /api routes) if optional public envs
+    // are missing during local dev or partial deployments.
+    // Callers that require a value should validate it at the callsite.
+    cachedPublicEnv = {
+      NEXT_PUBLIC_API_BASE_URL: process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:5000/api",
+      NEXT_PUBLIC_APP_NAME: process.env.NEXT_PUBLIC_APP_NAME || "MentorFlow",
+      NEXT_PUBLIC_APP_ORIGIN: process.env.NEXT_PUBLIC_APP_ORIGIN,
+      NEXT_PUBLIC_IIMGBB_KEY: process.env.NEXT_PUBLIC_IIMGBB_KEY || "",
+    };
+    return cachedPublicEnv;
+  }
+
+  cachedPublicEnv = parsedPublic.data;
+  return cachedPublicEnv;
+};
+
+// Backward-compatible named export
+export const publicEnv = getPublicEnv();
 
 type ServerEnv = z.infer<typeof serverEnvSchema>;
 let cachedServerEnv: ServerEnv | null = null;

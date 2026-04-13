@@ -8,6 +8,7 @@ import {
   Bell,
   MonitorDot,
   Monitor,
+  TicketPercent,
   LucideIcon
 } from "lucide-react";
 
@@ -70,6 +71,11 @@ export const adminRoutes: Route[] = [
         title: "Categories",
         url: "/dashboard/categories",
         icon: Layers,
+      },
+      {
+        title: "Coupons",
+        url: "/dashboard/coupons",
+        icon: TicketPercent,
       },
     ],
   },

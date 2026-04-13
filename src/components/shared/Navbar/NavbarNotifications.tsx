@@ -17,6 +17,12 @@ type N = {
   type?: string | null;
 };
 
+function moneyBDT(amount: unknown) {
+  const n = Number(amount);
+  if (!Number.isFinite(n) || n <= 0) return null;
+  return `৳${n.toLocaleString()}`;
+}
+
 function beep() {
   try {
     const ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
@@ -263,6 +269,11 @@ export default function NavbarNotifications() {
                           </div>
                           <p className="text-sm font-bold truncate mt-2">{n.title ?? "Notification"}</p>
                           <p className="text-xs text-slate-500 mt-1 line-clamp-2">{n.message}</p>
+                          {metaType(n) === "PAYMENT" && moneyBDT(n?.metadata?.amount) && (
+                            <p className="text-[11px] text-emerald-600 dark:text-emerald-300 mt-2 font-black">
+                              Paid: {moneyBDT(n?.metadata?.amount)}
+                            </p>
+                          )}
                           {n.transactionId && <p className="text-[11px] text-slate-400 mt-2">TX: {n.transactionId}</p>}
                           {n.createdAt && <p className="text-[11px] text-slate-400 mt-2">{new Date(n.createdAt).toLocaleString()}</p>}
                         </div>
