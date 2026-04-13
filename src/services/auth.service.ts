@@ -22,7 +22,12 @@ export async function loginAction(data: LoginFormValues) {
 
     // Set cookies natively in Next.js Server Action
     const cookieStore = await cookies();
-    const tokenOptions = { httpOnly: true, secure: process.env.NODE_ENV === "production", path: "/" };
+    const tokenOptions = {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax" as const,
+      path: "/",
+    };
 
     cookieStore.set("accessToken", result.data.accessToken, tokenOptions);
     cookieStore.set("refreshToken", result.data.refreshToken, tokenOptions);
@@ -53,7 +58,12 @@ export async function registerAction(data: RegisterFormValues) {
 
     // Set cookies dynamically
     const cookieStore = await cookies();
-    const tokenOptions = { httpOnly: true, secure: process.env.NODE_ENV === "production", path: "/" };
+    const tokenOptions = {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax" as const,
+      path: "/",
+    };
 
     cookieStore.set("accessToken", result.data.accessToken, tokenOptions);
     cookieStore.set("refreshToken", result.data.refreshToken, tokenOptions);
@@ -155,5 +165,50 @@ export async function updateMyProfileAction(data: any) {
     return { success: true, message: result.message, data: result.data };
   } catch (error: any) {
     return { success: false, message: error.message || "Something went wrong" };
+  }
+}
+
+export async function changePasswordAction(payload: { oldPassword: string; newPassword: string; revokeOtherSessions?: boolean }) {
+  try {
+    const env = getServerEnv();
+    const cookieStore = await cookies();
+    const token = cookieStore.get("accessToken")?.value;
+    const sessionToken = cookieStore.get("better-auth.session_token")?.value;
+
+    if (!token) return { success: false, message: "Unauthorized" };
+
+    // Default false so user stays logged in
+    const revokeOtherSessions = payload.revokeOtherSessions ?? false;
+    let response: Response;
+    try {
+      response = await fetch(`${env.BASE_API_URL}/auth/change-password`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+          ...(sessionToken ? { "x-session-token": sessionToken } : {}),
+        },
+        body: JSON.stringify({
+          oldPassword: payload.oldPassword,
+          newPassword: payload.newPassword,
+          revokeOtherSessions,
+        }),
+      });
+    } catch {
+      return { success: false, message: "Server unreachable. Please start backend and try again." };
+    }
+
+    const result = await response.json();
+    if (!response.ok || !result.success) {
+      return { success: false, message: result.message || "Failed to change password" };
+    }
+
+    return { success: true, message: result.message, data: result.data };
+  } catch (error: any) {
+    const msg = String(error?.message ?? "");
+    if (msg.toLowerCase().includes("fetch")) {
+      return { success: false, message: "Server unreachable. Please start backend and try again." };
+    }
+    return { success: false, message: msg || "Something went wrong" };
   }
 }

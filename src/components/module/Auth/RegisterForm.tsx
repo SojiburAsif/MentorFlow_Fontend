@@ -4,7 +4,6 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { registerSchema, RegisterFormValues } from "@/validations/auth.schema";
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
 import Link from "next/link";
@@ -22,7 +21,6 @@ export default function RegisterForm() {
   const [isLoading, setIsLoading] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [imageFile, setImageFile] = useState<File | null>(null);
-  const router = useRouter();
 
   const {
     register,
@@ -58,7 +56,8 @@ export default function RegisterForm() {
       
       if (res.success) {
         toast.success("Account created! Redirecting...", { id: toastId });
-        router.push("/dashboard");
+        // Force reload so server components read fresh httpOnly cookies
+        window.location.assign("/dashboard");
       } else {
         toast.error(res.message || "Registration failed", { id: toastId });
       }

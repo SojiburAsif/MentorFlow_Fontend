@@ -1,4 +1,3 @@
-
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/shared/dashboard/app-sidebar";
 import { Role } from "@/app/constants/role";
@@ -7,10 +6,14 @@ import { getUserInfo } from "@/lib/getUserInfo";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
-export default async function DashboardLayout({ admin, provider, clinte }: {
+export default async function DashboardLayout({
+  admin,
+  tutor,
+  student,
+}: {
   admin: React.ReactNode;
-  provider: React.ReactNode;
-  clinte: React.ReactNode;
+  tutor: React.ReactNode;
+  student: React.ReactNode;
 }) {
   const user = await getUserInfo();
   const cookieStore = await cookies();
@@ -31,14 +34,14 @@ export default async function DashboardLayout({ admin, provider, clinte }: {
 
   return (
     <SidebarProvider>
-      <div className="flex min-h-screen">
-        <div className="w-64">
+      <div className="flex min-h-screen w-full bg-[#07070f]">
+        <div className="w-64 shrink-0">
           <AppSidebar user={{ role: userRole }} />
         </div>
-        <main className="flex-1">
+        <main className="flex-1 overflow-auto">
           {userRole === Role.ADMIN && admin}
-          {userRole === Role.TUTOR && provider}
-          {userRole === Role.STUDENT && clinte}
+          {userRole === Role.TUTOR && tutor}
+          {userRole === Role.STUDENT && student}
         </main>
       </div>
     </SidebarProvider>

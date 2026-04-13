@@ -1,17 +1,20 @@
-import { 
-  BarChart3, 
-  Users, 
-  CalendarCheck, 
-  Layers, 
-  GraduationCap,   
-  LucideIcon 
+import {
+  BarChart3,
+  Users,
+  CalendarCheck,
+  Layers,
+  GraduationCap,
+  BarChart2,
+  Bell,
+  MonitorDot,
+  Monitor,
+  LucideIcon
 } from "lucide-react";
-
 
 export interface RouteItem {
   title: string;
   url: string;
-  icon?: LucideIcon; 
+  icon?: LucideIcon;
 }
 
 export interface Route {
@@ -23,56 +26,71 @@ export const adminRoutes: Route[] = [
   {
     title: "Dashboard",
     items: [
-      { 
-        title: "Statistics", 
-        url: "/admin-dashboard",
-        icon: BarChart3 
+      {
+        title: "Overview",
+        url: "/dashboard",
+        icon: BarChart3,
       },
     ],
   },
   {
     title: "Users",
     items: [
-      { 
-        title: "Manage Users", 
-        url: "/admin-dashboard/users",
-        icon: Users 
+      {
+        title: "Manage Users",
+        url: "/dashboard/users",
+        icon: Users,
       },
-    ],
-  },
-  {
-    title: "Profiles",
-    items: [
-      { 
-        title: "Student Profiles", 
-        url: "/admin-dashboard/AllStudentProfile",
-        icon: GraduationCap 
+      {
+        title: "Student Profiles",
+        url: "/dashboard/students",
+        icon: GraduationCap,
       },
-      // { 
-      //   title: "Tutor Profiles", 
-      //   url: "/admin-dashboard/AllTutorProfile", 
-      //   icon: Briefcase 
-      // },
+      {
+        title: "Tutor Profiles",
+        url: "/dashboard/tutors",
+        icon: MonitorDot,
+      },
     ],
   },
   {
     title: "Bookings",
     items: [
-      { 
-        title: "All Bookings", 
-        url: "/admin-dashboard/bookings",
-        icon: CalendarCheck 
+      {
+        title: "All Bookings",
+        url: "/dashboard/bookings",
+        icon: CalendarCheck,
       },
     ],
   },
   {
-    title: "Categories",
+    title: "Content",
     items: [
-      { 
-        title: "Manage Categories", 
-        url: "/admin-dashboard/categories",
-        icon: Layers 
+      {
+        title: "Categories",
+        url: "/dashboard/categories",
+        icon: Layers,
       },
     ],
   },
-]
+  {
+    title: "Insights",
+    items: [
+      {
+        title: "Analytics",
+        url: "/dashboard/analytics",
+        icon: BarChart2,
+      },
+      {
+        title: "Sessions",
+        url: "/dashboard/sessions",
+        icon: Monitor,
+      },
+      {
+        title: "Notifications",
+        url: "/dashboard/notifications",
+        icon: Bell,
+      },
+    ],
+  },
+];

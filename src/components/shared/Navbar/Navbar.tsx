@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @next/next/no-img-element */
 "use client";
 
 import Link from "next/link";
@@ -15,12 +16,15 @@ import { getMyProfileAction, logoutAction } from "@/services/auth.service";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import UpdateProfileForm from "./UpdateProfileForm";
-// We will create this next
+import ChangePasswordForm from "./ChangePasswordForm";
+import NavbarNotifications from "./NavbarNotifications";
+import NavbarInbox from "./NavbarInbox";
 
 export default function Navbar() {
     const [isOpen, setIsOpen] = useState(false);
     const [isProfileOpen, setIsProfileOpen] = useState(false);
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
     const [user, setUser] = useState<any>(null);
     const [isLoading, setIsLoading] = useState(true);
     const profileRef = useRef<HTMLDivElement>(null);
@@ -118,9 +122,21 @@ export default function Navbar() {
                         </Link>
                     )}
 
+                    {isLoggedIn && (
+                        <div className="hidden md:block">
+                            <NavbarInbox />
+                        </div>
+                    )}
+
                     <div className="hidden sm:block">
                         <ThemeToggle />
                     </div>
+
+                    {isLoggedIn && (
+                        <div className="hidden md:block">
+                            <NavbarNotifications />
+                        </div>
+                    )}
 
                     {isLoading ? (
                         <div className="hidden md:flex items-center gap-4 animate-pulse">
@@ -185,6 +201,20 @@ export default function Navbar() {
                                                     <DialogTitle>Update Profile</DialogTitle>
                                                 </DialogHeader>
                                                 <UpdateProfileForm user={user} onUpdate={(data) => { setUser({ ...user, ...data }); setIsProfileOpen(false); setIsModalOpen(false); }} />
+                                            </DialogContent>
+                                        </Dialog>
+
+                                        <Dialog open={isPasswordModalOpen} onOpenChange={setIsPasswordModalOpen}>
+                                            <DialogTrigger asChild>
+                                                <button className="w-full flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
+                                                    <Settings className="h-4 w-4 text-blue-500" /> Change Password
+                                                </button>
+                                            </DialogTrigger>
+                                            <DialogContent className="sm:max-w-[425px]">
+                                                <DialogHeader>
+                                                    <DialogTitle>Change Password</DialogTitle>
+                                                </DialogHeader>
+                                                <ChangePasswordForm onDone={() => { setIsProfileOpen(false); setIsPasswordModalOpen(false); }} />
                                             </DialogContent>
                                         </Dialog>
 

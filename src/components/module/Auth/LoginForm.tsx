@@ -1,10 +1,8 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { loginSchema, LoginFormValues } from "@/validations/auth.schema";
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
 import Link from "next/link";
@@ -15,9 +13,8 @@ import { Label } from "@/components/ui/label";
 import { Loader2, Mail, Lock, ArrowRight } from "lucide-react";
 import { loginAction } from "@/services/auth.service";
 
-export default function LoginForm() {
+export default function LoginForm({ nextUrl }: { nextUrl?: string }) {
   const [isLoading, setIsLoading] = useState(false);
-  const router = useRouter();
 
   const {
     register,
@@ -36,11 +33,11 @@ export default function LoginForm() {
       const res = await loginAction(data);
       if (res.success) {
         toast.success("Welcome back!", { id: toastId });
-        router.push("/dashboard");
+        window.location.assign(nextUrl || "/dashboard");
       } else {
         toast.error(res.message || "Invalid credentials", { id: toastId });
       }
-    } catch (error: any) {
+    } catch {
       toast.error("Something went wrong", { id: toastId });
     } finally {
       setIsLoading(false);

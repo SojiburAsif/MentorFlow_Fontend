@@ -15,19 +15,48 @@ import {
     SidebarRail,
 } from "@/components/ui/sidebar";
 
-
-
-import { LogOut, LayoutDashboard, Loader2 } from "lucide-react";
+import { LogOut, LayoutDashboard, Loader2, Shield, GraduationCap, BookOpen } from "lucide-react";
 import { toast } from "sonner";
+import MainLogo from "@/components/shared/logo/MainLogo";
 
-import { AdminRouters } from "@/Routers/adminRouter";
-import { ProviderRouters } from "@/Routers/ProviderRouter";
-import { UserRouters } from "@/Routers/userRouter";
-import { Route } from "@/types/icon";
+import { adminRoutes } from "@/Routes/adminRoutes";
+import { tutorRoutes } from "@/Routes/tutorRoutes";
+import { studentRoutes } from "@/Routes/studentRoutes";
+import { Route } from "@/Routes/adminRoutes";
 
 function cn(...inputs: (string | boolean | undefined | null | number)[]) {
     return inputs.filter(Boolean).join(" ");
 }
+
+const roleConfig = {
+    ADMIN: {
+        label: "Admin",
+        icon: Shield,
+        badge: "bg-blue-500/20 text-blue-300 border-blue-500/30",
+        active: "bg-blue-600 text-white shadow-lg shadow-blue-600/25",
+        hover: "hover:bg-blue-950/60 hover:text-blue-300",
+        iconActive: "text-white",
+        iconHover: "group-hover:text-blue-400",
+    },
+    TUTOR: {
+        label: "Tutor",
+        icon: BookOpen,
+        badge: "bg-blue-500/20 text-blue-300 border-blue-500/30",
+        active: "bg-blue-600 text-white shadow-lg shadow-blue-600/25",
+        hover: "hover:bg-blue-950/60 hover:text-blue-300",
+        iconActive: "text-white",
+        iconHover: "group-hover:text-blue-400",
+    },
+    STUDENT: {
+        label: "Student",
+        icon: GraduationCap,
+        badge: "bg-blue-500/20 text-blue-300 border-blue-500/30",
+        active: "bg-blue-600 text-white shadow-lg shadow-blue-600/25",
+        hover: "hover:bg-blue-950/60 hover:text-blue-300",
+        iconActive: "text-white",
+        iconHover: "group-hover:text-blue-400",
+    },
+};
 
 export function AppSidebar({
     user,
@@ -39,32 +68,26 @@ export function AppSidebar({
     const router = useRouter();
     const [isLoggingOut, setIsLoggingOut] = React.useState(false);
 
-    let routes: Route[] = [];
+    const role = (user.role as keyof typeof roleConfig) in roleConfig
+        ? (user.role as keyof typeof roleConfig)
+        : "STUDENT";
+    const config = roleConfig[role];
+    const RoleIcon = config.icon;
 
-    switch (user.role) {
-        case "ADMIN":
-            routes = AdminRouters;
-            break;
-        case "TUTOR":
-            routes = ProviderRouters;
-            break;
-        case "STUDENT":
-            routes = UserRouters;
-            break;
-        default:
-            routes = [];
+    let routes: Route[] = [];
+    switch (role) {
+        case "ADMIN":   routes = adminRoutes;   break;
+        case "TUTOR":   routes = tutorRoutes;   break;
+        case "STUDENT": routes = studentRoutes; break;
+        default:        routes = [];
     }
 
     const handleLogout = async () => {
-        if (isLoggingOut) {
-            return;
-        }
-
+        if (isLoggingOut) return;
         setIsLoggingOut(true);
         const loadingToast = toast.loading("Logging out...", {
             description: "Please wait while we log you out.",
         });
-
         try {
             await fetch("/logout", { method: "POST" });
             toast.success("Logged out successfully!", {
@@ -72,7 +95,7 @@ export function AppSidebar({
                 duration: 3000,
                 id: loadingToast,
             });
-        } catch (error) {
+        } catch {
             toast.error("Logout completed", {
                 description: "You have been logged out (with network issues).",
                 duration: 3000,
@@ -83,7 +106,6 @@ export function AppSidebar({
             setTimeout(() => {
                 router.refresh();
                 router.push("/login");
-
             }, 500);
         }
     };
@@ -91,63 +113,73 @@ export function AppSidebar({
     return (
         <Sidebar
             {...props}
-            className="border-r border-slate-200 dark:border-zinc-800 bg-white dark:bg-black transition-colors duration-300"
+            className="border-r border-blue-900/20 bg-[#07070f]"
         >
-            <SidebarContent className="flex flex-col justify-between h-full bg-white dark:bg-black">
+            <SidebarContent className="flex flex-col justify-between h-full bg-[#07070f]">
 
+                {/* Header */}
                 <div>
-                    <div className="px-6 py-8">
-                        <div className="flex items-center gap-3">
+                    <div className="px-5 py-7">
+                        <Link
+                            href="/"
+                            className="group flex items-center gap-3 mb-6 transition-transform active:scale-95"
+                            aria-label="Go to homepage"
+                        >
+                            <div className="scale-[0.90] origin-left">
+                                <MainLogo />
+                            </div>
+                        </Link>
 
-
-                            <Link href="/" className="group flex items-center gap-2 transition-transform active:scale-95">
-                                <img src="/favicon.ico" alt="" className="h-10 w-10 rounded-full animate-spin-slow" />
-                                <span className="text-xl font-bold tracking-tight text-gray-900 dark:text-white">
-                                    Serv<span className="font-serif italic text-gray-500 dark:text-gray-400">ZEN</span>
-                                </span>
-                            </Link>
-
-
-
+                        {/* Role Badge */}
+                        <div className={cn(
+                            "inline-flex items-center gap-2 px-3 py-1.5 rounded-full border text-xs font-semibold",
+                            config.badge
+                        )}>
+                            <RoleIcon size={12} />
+                            {config.label} Panel
                         </div>
                     </div>
 
-                    <div className="space-y-4">
+                    {/* Navigation */}
+                    <div className="space-y-1 px-3">
                         {routes.map((group) => (
-                            <SidebarGroup key={group.title} className="px-4">
-                                <SidebarGroupLabel className="px-2 text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 dark:text-zinc-500 mb-2">
+                            <SidebarGroup key={group.title} className="px-1">
+                                <SidebarGroupLabel className="px-2 text-[10px] font-bold uppercase tracking-[0.18em] text-blue-400/50 mb-1">
                                     {group.title}
                                 </SidebarGroupLabel>
 
                                 <SidebarGroupContent>
-                                    <SidebarMenu className="gap-1">
+                                    <SidebarMenu className="gap-0.5">
                                         {group.items.map((item) => {
-                                            const isActive = pathname === item.url;
+                                            const url = item.url;
+                                            // Fix: "/dashboard" should not stay active for all nested routes
+                                            const isActive = url === "/dashboard"
+                                                ? pathname === "/dashboard"
+                                                : pathname === url || pathname.startsWith(`${url}/`);
                                             const Icon = item.icon || LayoutDashboard;
 
                                             return (
                                                 <SidebarMenuItem key={item.title}>
                                                     <SidebarMenuButton asChild>
                                                         <Link
-                                                            href={item.url}
+                                                            href={url}
                                                             className={cn(
-                                                                "flex items-center gap-3 px-4 py-6 rounded-2xl font-bold transition-all duration-200 group",
+                                                                "flex items-center gap-3 px-3 py-3 rounded-xl font-semibold transition-all duration-200 group text-[15px]",
                                                                 isActive
-                                                                    ? "bg-green-600 text-white shadow-lg shadow-green-500/20"
-                                                                    : "text-slate-600 dark:text-zinc-400 hover:bg-slate-100 dark:hover:bg-zinc-900 hover:text-green-600 dark:hover:text-green-400"
+                                                                    ? config.active
+                                                                    : cn("text-slate-400", config.hover)
                                                             )}
                                                         >
                                                             <Icon
-                                                                size={18}
+                                                                size={16}
                                                                 className={cn(
-                                                                    "transition-transform group-hover:scale-110",
-                                                                    isActive ? "text-white" : "text-slate-400 group-hover:text-green-600"
+                                                                    "shrink-0 transition-transform duration-200 group-hover:scale-110",
+                                                                    isActive ? config.iconActive : cn("text-slate-500", config.iconHover)
                                                                 )}
                                                             />
-                                                            <span className="text-sm tracking-wide">{item.title}</span>
-
+                                                            <span>{item.title}</span>
                                                             {isActive && (
-                                                                <div className="ml-auto h-1.5 w-1.5 rounded-full bg-white animate-pulse" />
+                                                                <div className="ml-auto h-1.5 w-1.5 rounded-full bg-white/70 animate-pulse" />
                                                             )}
                                                         </Link>
                                                     </SidebarMenuButton>
@@ -161,21 +193,23 @@ export function AppSidebar({
                     </div>
                 </div>
 
-                <div className="px-4 pb-8">
-                    <div className="pt-4 border-t border-slate-100 dark:border-zinc-900">
+                {/* Logout */}
+                <div className="px-4 pb-6">
+                    <div className="pt-4 border-t border-blue-900/20">
                         <button
                             onClick={handleLogout}
                             disabled={isLoggingOut}
-                            className="flex items-center gap-3 w-full px-4 py-4 rounded-2xl
-              font-bold text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-500/10 
-              border border-transparent hover:border-rose-200 dark:hover:border-rose-500/20 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                            className="flex items-center gap-3 w-full px-4 py-3 rounded-xl
+                font-medium text-rose-400 hover:bg-rose-500/10
+                border border-transparent hover:border-rose-500/20 transition-all duration-200
+                disabled:opacity-50 disabled:cursor-not-allowed text-sm group"
                         >
                             {isLoggingOut ? (
-                                <Loader2 size={18} className="animate-spin" />
+                                <Loader2 size={16} className="animate-spin" />
                             ) : (
-                                <LogOut size={18} />
+                                <LogOut size={16} className="group-hover:scale-110 transition-transform" />
                             )}
-                            <span className="text-sm">{isLoggingOut ? "Logging out..." : "Logout Session"}</span>
+                            <span>{isLoggingOut ? "Logging out..." : "Logout Session"}</span>
                         </button>
                     </div>
                 </div>

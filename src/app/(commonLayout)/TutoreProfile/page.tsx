@@ -1,3 +1,5 @@
+import { redirect } from "next/navigation";
+
 export default function TutorProfilePage() {
-  return <div>Tutor Profile</div>;
+  redirect("/tutors");
 }
