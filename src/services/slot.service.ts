@@ -89,3 +89,22 @@ export async function deleteSlot(slotId: string) {
     return { success: false, message: e.message || "Something went wrong" };
   }
 }
+
+/** [ADMIN] Get all slots from all tutors */
+export async function getAllSlotsAdmin() {
+  const env = getServerEnv();
+  const headers = await getAuthHeaders();
+  if (!headers) return { success: false, message: "Unauthorized" };
+
+  try {
+    const res = await fetch(`${env.BASE_API_URL}/tutor/profileSlot`, {
+      headers,
+      cache: "no-store",
+    });
+    const data = await res.json();
+    if (!res.ok || !data.success) return { success: false, message: data.message || "Failed" };
+    return { success: true, data: data.data };
+  } catch (e: any) {
+    return { success: false, message: e.message || "Something went wrong" };
+  }
+}

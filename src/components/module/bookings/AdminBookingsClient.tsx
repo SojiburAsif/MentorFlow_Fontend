@@ -4,7 +4,7 @@
 import { useMemo, useState, useTransition } from "react";
 import { toast } from "sonner";
 import { Eye, RefreshCcw, Save, Trash2 } from "lucide-react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 type BookingRow = any;
 
@@ -135,6 +135,9 @@ export default function AdminBookingsClient({ bookings }: { bookings: BookingRow
         <DialogContent className="max-w-3xl bg-[#0d0d1a] border border-blue-900/20 text-white">
           <DialogHeader>
             <DialogTitle className="text-white">Booking details</DialogTitle>
+            <DialogDescription className="text-slate-400">
+              View booking information, update status, or remove invalid entries.
+            </DialogDescription>
           </DialogHeader>
 
           {!active ? null : (

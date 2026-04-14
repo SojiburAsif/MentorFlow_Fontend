@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import * as React from "react";
@@ -15,7 +16,7 @@ import {
     SidebarRail,
 } from "@/components/ui/sidebar";
 
-import { LogOut, LayoutDashboard, Loader2, Shield, GraduationCap, BookOpen } from "lucide-react";
+import { LogOut, LayoutDashboard, Loader2, Shield, GraduationCap, BookOpen, ChevronRight } from "lucide-react";
 import { toast } from "sonner";
 import MainLogo from "@/components/shared/logo/MainLogo";
 
@@ -32,29 +33,23 @@ const roleConfig = {
     ADMIN: {
         label: "Admin",
         icon: Shield,
-        badge: "bg-blue-500/20 text-blue-300 border-blue-500/30",
-        active: "bg-blue-600 text-white shadow-lg shadow-blue-600/25",
-        hover: "hover:bg-blue-950/60 hover:text-blue-300",
-        iconActive: "text-white",
-        iconHover: "group-hover:text-blue-400",
+        badge: "bg-blue-600/10 text-blue-500 border-blue-500/20",
+        active: "bg-blue-600 text-white shadow-lg shadow-blue-600/20",
+        hover: "hover:bg-blue-600/5 hover:text-blue-500",
     },
     TUTOR: {
         label: "Tutor",
         icon: BookOpen,
-        badge: "bg-blue-500/20 text-blue-300 border-blue-500/30",
-        active: "bg-blue-600 text-white shadow-lg shadow-blue-600/25",
-        hover: "hover:bg-blue-950/60 hover:text-blue-300",
-        iconActive: "text-white",
-        iconHover: "group-hover:text-blue-400",
+        badge: "bg-blue-600/10 text-blue-400 border-blue-500/20",
+        active: "bg-blue-600 text-white shadow-lg shadow-blue-600/20",
+        hover: "hover:bg-blue-600/5 hover:text-blue-400",
     },
     STUDENT: {
         label: "Student",
         icon: GraduationCap,
-        badge: "bg-blue-500/20 text-blue-300 border-blue-500/30",
-        active: "bg-blue-600 text-white shadow-lg shadow-blue-600/25",
-        hover: "hover:bg-blue-950/60 hover:text-blue-300",
-        iconActive: "text-white",
-        iconHover: "group-hover:text-blue-400",
+        badge: "bg-blue-600/10 text-blue-300 border-blue-500/20",
+        active: "bg-blue-600 text-white shadow-lg shadow-blue-600/20",
+        hover: "hover:bg-blue-600/5 hover:text-blue-300",
     },
 };
 
@@ -85,66 +80,39 @@ export function AppSidebar({
     const handleLogout = async () => {
         if (isLoggingOut) return;
         setIsLoggingOut(true);
-        const loadingToast = toast.loading("Logging out...", {
-            description: "Please wait while we log you out.",
-        });
         try {
             await fetch("/logout", { method: "POST" });
-            toast.success("Logged out successfully!", {
-                description: "You have been logged out of your account.",
-                duration: 3000,
-                id: loadingToast,
-            });
+            toast.success("Logged out successfully");
+            router.refresh();
+            router.push("/login");
         } catch {
-            toast.error("Logout completed", {
-                description: "You have been logged out (with network issues).",
-                duration: 3000,
-                id: loadingToast,
-            });
-        } finally {
+            toast.error("Logout failed");
             setIsLoggingOut(false);
-            setTimeout(() => {
-                router.refresh();
-                router.push("/login");
-            }, 500);
         }
     };
 
     return (
-        <Sidebar
-            {...props}
-            className="border-r border-blue-900/20 bg-[#07070f]"
-        >
-            <SidebarContent className="flex flex-col justify-between h-full bg-[#07070f]">
-
-                {/* Header */}
+        <Sidebar {...props} className="border-r border-zinc-200 dark:border-zinc-800 bg-white dark:bg-black">
+            <SidebarContent className="flex flex-col justify-between h-full bg-white dark:bg-black">
                 <div>
-                    <div className="px-5 py-7">
-                        <Link
-                            href="/"
-                            className="group flex items-center gap-3 mb-6 transition-transform active:scale-95"
-                            aria-label="Go to homepage"
-                        >
-                            <div className="scale-[0.90] origin-left">
-                                <MainLogo />
-                            </div>
+                    <div className="px-6 py-6">
+                        <Link href="/" className="inline-block mb-4 active:scale-95 transition-transform">
+                            <MainLogo />
                         </Link>
 
-                        {/* Role Badge */}
                         <div className={cn(
-                            "inline-flex items-center gap-2 px-3 py-1.5 rounded-full border text-xs font-semibold",
+                            "inline-flex items-center gap-2 px-3 py-1 rounded-full border text-[10px] font-black uppercase tracking-widest",
                             config.badge
                         )}>
-                            <RoleIcon size={12} />
-                            {config.label} Panel
+                            <RoleIcon size={10} />
+                            {config.label}
                         </div>
                     </div>
 
-                    {/* Navigation */}
-                    <div className="space-y-1 px-3">
+                    <div className="space-y-4 px-3">
                         {routes.map((group) => (
-                            <SidebarGroup key={group.title} className="px-1">
-                                <SidebarGroupLabel className="px-2 text-[10px] font-bold uppercase tracking-[0.18em] text-blue-400/50 mb-1">
+                            <SidebarGroup key={group.title} className="p-0">
+                                <SidebarGroupLabel className="px-4 text-[10px] font-bold uppercase tracking-[0.2em] text-zinc-400 dark:text-zinc-600 mb-2">
                                     {group.title}
                                 </SidebarGroupLabel>
 
@@ -152,7 +120,6 @@ export function AppSidebar({
                                     <SidebarMenu className="gap-0.5">
                                         {group.items.map((item) => {
                                             const url = item.url;
-                                            // Fix: "/dashboard" should not stay active for all nested routes
                                             const isActive = url === "/dashboard"
                                                 ? pathname === "/dashboard"
                                                 : pathname === url || pathname.startsWith(`${url}/`);
@@ -164,23 +131,13 @@ export function AppSidebar({
                                                         <Link
                                                             href={url}
                                                             className={cn(
-                                                                "flex items-center gap-3 px-3 py-3 rounded-xl font-semibold transition-all duration-200 group text-[15px]",
-                                                                isActive
-                                                                    ? config.active
-                                                                    : cn("text-slate-400", config.hover)
+                                                                "flex items-center gap-3 px-4 py-2.5 rounded-lg font-bold transition-all text-[13px]",
+                                                                isActive ? config.active : cn("text-zinc-500 dark:text-zinc-400", config.hover)
                                                             )}
                                                         >
-                                                            <Icon
-                                                                size={16}
-                                                                className={cn(
-                                                                    "shrink-0 transition-transform duration-200 group-hover:scale-110",
-                                                                    isActive ? config.iconActive : cn("text-slate-500", config.iconHover)
-                                                                )}
-                                                            />
+                                                            <Icon size={16} />
                                                             <span>{item.title}</span>
-                                                            {isActive && (
-                                                                <div className="ml-auto h-1.5 w-1.5 rounded-full bg-white/70 animate-pulse" />
-                                                            )}
+                                                            {isActive && <ChevronRight size={14} className="ml-auto opacity-70" />}
                                                         </Link>
                                                     </SidebarMenuButton>
                                                 </SidebarMenuItem>
@@ -193,28 +150,23 @@ export function AppSidebar({
                     </div>
                 </div>
 
-                {/* Logout */}
-                <div className="px-4 pb-6">
-                    <div className="pt-4 border-t border-blue-900/20">
-                        <button
-                            onClick={handleLogout}
-                            disabled={isLoggingOut}
-                            className="flex items-center gap-3 w-full px-4 py-3 rounded-xl
-                font-medium text-rose-400 hover:bg-rose-500/10
-                border border-transparent hover:border-rose-500/20 transition-all duration-200
-                disabled:opacity-50 disabled:cursor-not-allowed text-sm group"
-                        >
-                            {isLoggingOut ? (
-                                <Loader2 size={16} className="animate-spin" />
-                            ) : (
-                                <LogOut size={16} className="group-hover:scale-110 transition-transform" />
-                            )}
-                            <span>{isLoggingOut ? "Logging out..." : "Logout Session"}</span>
-                        </button>
-                    </div>
+                <div className="px-4 pb-6 mt-auto">
+                    <button
+                        onClick={handleLogout}
+                        disabled={isLoggingOut}
+                        className="flex items-center justify-center gap-2 w-full py-3 rounded-xl
+                        text-[12px] font-black text-white bg-zinc-900 hover:bg-red-600 
+                        transition-all duration-300 disabled:opacity-50 group border border-zinc-800"
+                    >
+                        {isLoggingOut ? (
+                            <Loader2 size={14} className="animate-spin" />
+                        ) : (
+                            <LogOut size={14} className="group-hover:-translate-x-1 transition-transform" />
+                        )}
+                        <span>{isLoggingOut ? "SIGNING OUT..." : "EXIT SESSION"}</span>
+                    </button>
                 </div>
             </SidebarContent>
-
             <SidebarRail />
         </Sidebar>
     );

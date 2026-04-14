@@ -12,6 +12,12 @@ import {
   Shield,
   Activity,
   ArrowUpRight,
+  Zap,
+  Database,
+  LayoutDashboard,
+  Settings2,
+  Globe,
+  Layers,
 } from "lucide-react";
 
 interface StatCardProps {
@@ -20,67 +26,45 @@ interface StatCardProps {
   subtitle: string;
   icon: React.ElementType;
   trend?: string;
-  color: "blue" | "indigo" | "violet" | "cyan";
+  glowColor: string;
 }
 
-function StatCard({ title, value, subtitle, icon: Icon, trend, color }: StatCardProps) {
-  const colorMap = {
-    blue: {
-      icon: "bg-blue-500/15 text-blue-400",
-      glow: "shadow-blue-900/20",
-      trend: "text-blue-400",
-      border: "border-blue-500/10",
-    },
-    indigo: {
-      icon: "bg-indigo-500/15 text-indigo-400",
-      glow: "shadow-indigo-900/20",
-      trend: "text-indigo-400",
-      border: "border-indigo-500/10",
-    },
-    violet: {
-      icon: "bg-violet-500/15 text-violet-400",
-      glow: "shadow-violet-900/20",
-      trend: "text-violet-400",
-      border: "border-violet-500/10",
-    },
-    cyan: {
-      icon: "bg-cyan-500/15 text-cyan-400",
-      glow: "shadow-cyan-900/20",
-      trend: "text-cyan-400",
-      border: "border-cyan-500/10",
-    },
-  };
-
-  const c = colorMap[color];
-
+function StatCard({ title, value, subtitle, icon: Icon, trend, glowColor }: StatCardProps) {
   return (
     <div
-      className={`relative bg-[#0d0d1a] border ${c.border} rounded-2xl p-6 shadow-xl ${c.glow} hover:border-opacity-30 transition-all duration-300 group overflow-hidden`}
+      className="group relative overflow-hidden rounded-2xl border border-blue-500/10 bg-[#0a0a14] p-5 shadow-[0_0_20px_rgba(0,0,0,0.4)] transition-all duration-500 hover:-translate-y-1 hover:border-blue-500/40"
+      style={{ boxShadow: `0 0 30px ${glowColor}18` }}
     >
-      {/* Background glow */}
-      <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 bg-gradient-to-br from-blue-600/3 to-transparent rounded-2xl" />
+      <div className="absolute right-0 top-0 p-4 text-white opacity-[0.02] transition-opacity group-hover:opacity-[0.05]">
+        <Icon size={80} />
+      </div>
 
-      <div className="relative flex items-start justify-between">
-        <div className="flex-1">
-          <p className="text-xs font-semibold uppercase tracking-widest text-slate-500 mb-3">
-            {title}
-          </p>
-          <p className="text-3xl font-black text-white mb-1">
-            {value ?? "—"}
-          </p>
-          <p className="text-xs text-slate-500">{subtitle}</p>
+      <div className="relative z-10">
+        <div className="mb-4 flex items-center justify-between">
+          <div className="rounded-xl border border-blue-500/20 bg-blue-500/5 p-2.5 text-blue-400 transition-transform duration-300 group-hover:scale-110">
+            <Icon size={18} />
+          </div>
+          {trend && (
+            <span className="rounded-md border border-blue-500/20 bg-blue-500/10 px-1.5 py-0.5 text-[9px] font-black text-blue-400">
+              {trend}
+            </span>
+          )}
         </div>
-        <div className={`p-3 rounded-xl ${c.icon}`}>
-          <Icon size={20} />
+
+        <div>
+          <div className="mb-1 flex items-center gap-2 text-[9px] font-bold uppercase tracking-[0.2em] text-slate-500">
+            <span className="h-1 w-1 rounded-full bg-blue-500" /> {title}
+          </div>
+          <h3 className="mb-1 text-2xl font-black tracking-tighter text-white transition-colors group-hover:text-blue-400">
+            {value ?? "—"}
+          </h3>
+          <div className="flex items-center gap-1.5 text-[10px] font-medium uppercase tracking-wide text-slate-500">
+            <Activity size={10} className="text-blue-500/30" /> {subtitle}
+          </div>
         </div>
       </div>
 
-      {trend && (
-        <div className={`mt-4 flex items-center gap-1.5 text-xs font-semibold ${c.trend}`}>
-          <ArrowUpRight size={13} />
-          {trend}
-        </div>
-      )}
+      <div className="absolute bottom-0 left-0 h-[1.5px] w-0 bg-gradient-to-r from-transparent via-blue-500 to-transparent transition-all duration-500 group-hover:w-full" />
     </div>
   );
 }
@@ -101,146 +85,160 @@ export default async function AdminDashboardPage() {
   const totalUsers = analytics?.totalUsers ?? users?.length ?? stats?.totalUsers ?? "—";
   const totalTutors = analytics?.totalTutors ?? stats?.totalTutors ?? "—";
   const totalBookings = analytics?.totalBookings ?? bookings?.length ?? stats?.totalBookings ?? "—";
-  const totalRevenue = analytics?.totalRevenue ?? stats?.totalRevenue;
-  const revenueDisplay = totalRevenue != null ? `৳${Number(totalRevenue).toLocaleString()}` : "—";
+  const revenueDisplay =
+    analytics?.totalRevenue != null ? `৳${Number(analytics.totalRevenue).toLocaleString()}` : "—";
 
-  const charts = stats?.charts ?? null;
-  const monthly = Array.isArray(charts?.monthlyBookings) ? charts.monthlyBookings : [];
-  const bookingStatus = Array.isArray(charts?.bookingStatusDistribution) ? charts.bookingStatusDistribution : [];
-  const roleDist = Array.isArray(charts?.roleDistribution) ? charts.roleDistribution : [];
+  const monthly = Array.isArray(stats?.charts?.monthlyBookings) ? stats.charts.monthlyBookings : [];
+  const bookingStatus = Array.isArray(stats?.charts?.bookingStatusDistribution)
+    ? stats.charts.bookingStatusDistribution
+    : [];
+  const roleDist = Array.isArray(stats?.charts?.roleDistribution) ? stats.charts.roleDistribution : [];
 
   return (
-    <div className="min-h-screen bg-[#07070f] text-white">
-      {/* Top header bar */}
-      <div className="border-b border-blue-900/20 bg-[#0a0a14] px-8 py-5">
-        <div className="flex items-center gap-3">
-          <div className="p-2 bg-blue-600/20 rounded-lg">
-            <Shield size={18} className="text-blue-400" />
+    <div className="min-h-screen space-y-6 bg-[#020205] p-4 text-white sm:p-6 lg:space-y-8 lg:p-8">
+      <header className="relative overflow-hidden rounded-2xl border border-white/5 bg-[#0a0a14] px-5 py-5 shadow-[0_10px_40px_rgba(0,0,0,0.4)] sm:px-6">
+        <div className="absolute -z-10 h-32 w-32 -right-6 top-0 rounded-full bg-blue-600/5 blur-[60px]" />
+
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+          <div className="flex items-center gap-4">
+            <div className="rounded-xl bg-gradient-to-br from-blue-600 to-blue-800 p-2.5 shadow-lg shadow-blue-500/20">
+              <Shield size={20} className="text-white" />
+            </div>
+            <div>
+              <h1 className="text-lg font-black uppercase italic leading-tight tracking-widest sm:text-xl">
+                Nexus <span className="text-blue-500">Terminal</span>
+              </h1>
+              <div className="mt-0.5 flex flex-wrap items-center gap-3">
+                <div className="flex items-center gap-1.5 text-[9px] font-bold uppercase tracking-widest text-slate-500">
+                  <Globe size={10} className="text-blue-500/70" /> Infrastructure
+                </div>
+                <span className="h-1 w-1 rounded-full bg-slate-800" />
+                <div className="flex items-center gap-1.5 text-[9px] font-bold uppercase tracking-widest text-green-500">
+                  <div className="h-1.5 w-1.5 rounded-full bg-green-500 animate-pulse" /> Live
+                </div>
+              </div>
+            </div>
           </div>
-          <div>
-            <h1 className="text-lg font-bold text-white">Admin Dashboard</h1>
-            <p className="text-xs text-slate-500">Platform overview & management</p>
+
+          <div className="flex gap-2">
+            <button className="rounded-lg border border-white/10 bg-white/5 px-3 py-1.5 text-[10px] font-bold uppercase tracking-widest transition-all hover:bg-white/10">
+              Export
+            </button>
+            <button className="rounded-lg bg-blue-600 px-3 py-1.5 text-[10px] font-bold uppercase tracking-widest transition-all hover:bg-blue-500">
+              Config
+            </button>
+          </div>
+        </div>
+      </header>
+
+      <section className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        <StatCard title="Users" value={totalUsers} subtitle="Verified Node" icon={Users} glowColor="#3b82f6" trend="Sync" />
+        <StatCard title="Mentors" value={totalTutors} subtitle="Validated" icon={BookOpen} glowColor="#6366f1" />
+        <StatCard title="Sessions" value={totalBookings} subtitle="Execution" icon={CalendarCheck} glowColor="#8b5cf6" trend="+14%" />
+        <StatCard title="Revenue" value={revenueDisplay} subtitle="Liquidity" icon={TrendingUp} glowColor="#06b6d4" />
+      </section>
+
+      <div className="grid grid-cols-1 gap-6 xl:grid-cols-3">
+        <div className="relative overflow-hidden rounded-2xl border border-white/5 bg-[#0a0a14] p-5 shadow-2xl sm:p-6 xl:col-span-2">
+          <div className="absolute inset-0 bg-[linear-gradient(rgba(59,130,246,0.01)_1px,transparent_1px),linear-gradient(90deg,rgba(59,130,246,0.01)_1px,transparent_1px)] bg-[size:30px_30px]" />
+          <div className="relative z-10 mb-6 flex items-center justify-between">
+            <h3 className="flex items-center gap-2 text-xs font-black uppercase tracking-widest">
+              <Zap size={14} className="text-blue-500" /> Growth Velocity
+            </h3>
+            <span className="rounded-md border border-blue-500/20 bg-blue-500/5 px-2 py-0.5 text-[9px] font-black tracking-tighter text-blue-400">
+              RT-SYNC
+            </span>
+          </div>
+          <div className="relative z-10 h-[220px] sm:h-[260px]">
+            <SparkBarChart
+              data={monthly.map((m: any) => ({ label: String(m.month), value: Number(m.total) || 0 }))}
+              barColor="#3b82f6"
+            />
+          </div>
+        </div>
+
+        <div className="flex flex-col rounded-2xl border border-white/5 bg-[#0a0a14] p-5 shadow-2xl sm:p-6">
+          <h3 className="mb-6 text-xs font-black uppercase tracking-widest">
+            Workflow Distribution
+          </h3>
+          <div className="flex h-[220px] items-center justify-center sm:h-[260px]">
+            <DonutChart
+              data={bookingStatus.map((s: any, idx: number) => ({
+                label: s.status,
+                value: s.count,
+                color: ["#3b82f6", "#6366f1", "#10b981", "#f59e0b", "#ef4444"][idx % 5],
+              }))}
+            />
           </div>
         </div>
       </div>
 
-      <div className="px-8 py-8 space-y-8">
-        {/* Stats Grid */}
-        <div>
-          <h2 className="text-xs font-bold uppercase tracking-widest text-blue-400/60 mb-4">
-            Platform Stats
-          </h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
-            <StatCard
-              title="Total Users"
-              value={totalUsers}
-              subtitle="Registered accounts"
-              icon={Users}
-              color="blue"
-              trend="All time total"
-            />
-            <StatCard
-              title="Total Tutors"
-              value={totalTutors}
-              subtitle="Active tutors on platform"
-              icon={BookOpen}
-              color="indigo"
-              trend="All time total"
-            />
-            <StatCard
-              title="Total Bookings"
-              value={totalBookings}
-              subtitle="Sessions booked"
-              icon={CalendarCheck}
-              color="violet"
-              trend="All time total"
-            />
-            <StatCard
-              title="Total Revenue"
-              value={revenueDisplay}
-              subtitle="Platform earnings"
-              icon={TrendingUp}
-              color="cyan"
-              trend="All time total"
-            />
+      <div className="grid grid-cols-1 gap-6 xl:grid-cols-3">
+        <div className="rounded-2xl border border-white/5 border-l-2 border-l-blue-600 bg-[#0a0a14] p-5 shadow-2xl sm:p-6">
+          <div className="mb-6 flex items-center gap-2">
+            <Layers size={14} className="text-blue-500" />
+            <h3 className="text-[10px] font-black uppercase tracking-widest">
+              Identity Matrix
+            </h3>
           </div>
-        </div>
-
-        {/* Charts */}
-        <div className="grid grid-cols-1 xl:grid-cols-3 gap-4">
-          <div className="xl:col-span-2 bg-[#0d0d1a] border border-blue-900/15 rounded-2xl p-6">
-            <div className="flex items-center justify-between mb-4">
-              <div>
-                <p className="text-sm font-bold text-white">Bookings over time</p>
-                <p className="text-xs text-slate-500 mt-0.5">Last 12 months</p>
-              </div>
-              <span className="text-xs text-slate-600">{monthly.length ? `${monthly.length} points` : "No data"}</span>
-            </div>
-            <SparkBarChart
-              data={monthly.map((m: any) => ({ label: String(m.month), value: Number(m.total) || 0 }))}
-              barColor="#60a5fa"
-            />
-          </div>
-
-          <div className="bg-[#0d0d1a] border border-blue-900/15 rounded-2xl p-6">
-            <p className="text-sm font-bold text-white">Booking status</p>
-            <p className="text-xs text-slate-500 mt-0.5 mb-4">Distribution</p>
+          <div className="flex h-[220px] items-center justify-center sm:h-[240px]">
             <DonutChart
-              data={bookingStatus.map((s: any, idx: number) => ({
-                label: String(s.status),
-                value: Number(s.count) || 0,
-                color: ["#60a5fa", "#a78bfa", "#34d399", "#fbbf24", "#fb7185"][idx % 5],
+              data={roleDist.map((r: any, idx: number) => ({
+                label: r.role,
+                value: r.count,
+                color: ["#0ea5e9", "#4f46e5", "#10b981"][idx % 3],
               }))}
             />
           </div>
         </div>
 
-        <div className="bg-[#0d0d1a] border border-blue-900/15 rounded-2xl p-6">
-          <p className="text-sm font-bold text-white">User roles</p>
-          <p className="text-xs text-slate-500 mt-0.5 mb-4">Distribution</p>
-          <DonutChart
-            data={roleDist.map((r: any, idx: number) => ({
-              label: String(r.role),
-              value: Number(r.count) || 0,
-              color: ["#38bdf8", "#818cf8", "#34d399"][idx % 3],
-            }))}
-          />
-        </div>
+        <div className="space-y-4 xl:col-span-2">
+          <div className="flex items-center gap-2">
+            <Settings2 size={14} className="text-blue-500" />
+            <h2 className="text-[9px] font-black uppercase tracking-[0.3em] text-slate-500">
+              Commands
+            </h2>
+          </div>
 
-        {/* Recent Activity Placeholder */}
-        <div>
-          <h2 className="text-xs font-bold uppercase tracking-widest text-blue-400/60 mb-4">
-            Quick Actions
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {[
-              { label: "Manage Users", desc: "View and moderate user accounts", href: "/dashboard/users", color: "blue" },
-              { label: "All Bookings", desc: "Review & manage session bookings", href: "/dashboard/bookings", color: "indigo" },
-              { label: "Categories", desc: "Add or edit subject categories", href: "/dashboard/categories", color: "violet" },
+              { label: "Accounts", href: "/dashboard/users", icon: Users },
+              { label: "Bookings", href: "/dashboard/bookings", icon: Database },
+              { label: "Schema", href: "/dashboard/categories", icon: LayoutDashboard },
             ].map((action) => (
               <a
                 key={action.label}
                 href={action.href}
-                className="group flex items-center justify-between bg-[#0d0d1a] border border-blue-900/15 rounded-2xl p-5 hover:border-blue-500/30 transition-all duration-200"
+                className="group flex items-center justify-between rounded-xl border border-white/5 bg-[#0a0a14] p-4 transition-all hover:border-blue-500/30 hover:shadow-[0_0_15px_rgba(59,130,246,0.1)]"
               >
-                <div>
-                  <p className="text-sm font-semibold text-white group-hover:text-blue-300 transition-colors">
+                <div className="flex items-center gap-3">
+                  <div className="rounded-lg bg-white/5 p-2 text-slate-400 transition-colors group-hover:text-blue-400">
+                    <action.icon size={14} />
+                  </div>
+                  <span className="text-[11px] font-black uppercase tracking-tight text-white">
                     {action.label}
-                  </p>
-                  <p className="text-xs text-slate-500 mt-1">{action.desc}</p>
+                  </span>
                 </div>
-                <ArrowUpRight size={16} className="text-slate-600 group-hover:text-blue-400 transition-colors shrink-0" />
+                <ArrowUpRight size={12} className="text-slate-700 transition-all group-hover:text-blue-500" />
               </a>
             ))}
           </div>
         </div>
-
-        {/* Status indicator */}
-        <div className="flex items-center gap-2 text-xs text-slate-600">
-          <Activity size={12} className="text-green-500" />
-          <span>Live data · Updates on refresh</span>
-        </div>
       </div>
+
+      <footer className="flex flex-col gap-3 border-t border-white/5 pt-4 text-slate-600 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex items-center gap-3 text-[8px] font-black uppercase tracking-[0.2em]">
+          <div className="flex items-center gap-1.5">
+            <div className="h-1.5 w-1.5 rounded-full bg-blue-500/40" />
+            Link Secure
+          </div>
+          <span className="h-2.5 w-px bg-slate-800" />
+          <span>v4.0.2</span>
+        </div>
+        <div className="rounded border border-white/5 bg-black/50 px-3 py-1 text-[8px] font-mono uppercase tracking-tighter text-blue-500/70">
+          Pulse OK • {new Date().toLocaleTimeString()}
+        </div>
+      </footer>
     </div>
   );
 }

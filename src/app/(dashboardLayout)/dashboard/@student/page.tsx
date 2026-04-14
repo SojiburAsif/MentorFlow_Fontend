@@ -88,7 +88,14 @@ export default async function StudentDashboardPage() {
   const monthly = Array.isArray(charts?.monthlyBookings) ? charts.monthlyBookings : [];
   const statusDist = Array.isArray(charts?.bookingStatusDistribution) ? charts.bookingStatusDistribution : [];
 
-  const totalBookings = stats?.totalBookings ?? bookings?.total ?? (Array.isArray(bookings) ? bookings.length : "—");
+  let totalBookings: string = "—";
+  if (Array.isArray(bookings)) {
+    totalBookings = bookings.length.toString();
+  } else if (typeof stats?.totalBookings === "number") {
+    totalBookings = stats.totalBookings.toString();
+  } else if (typeof bookings?.total === "number") {
+    totalBookings = bookings.total.toString();
+  }
   const upcomingBookings = bookings?.upcoming?.length ?? bookings?.upcomingCount ?? "—";
   const wishlistCount = Array.isArray(wishlist) ? wishlist.length : wishlist?.total ?? "—";
   const reviewsCount = Array.isArray(reviews) ? reviews.length : reviews?.total ?? "—";
@@ -114,7 +121,7 @@ export default async function StudentDashboardPage() {
           <h2 className="text-xs font-bold uppercase tracking-widest text-sky-400/60 mb-4">
             My Overview
           </h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4 flex-wrap">
             <StatCard
               title="Total Bookings"
               value={totalBookings}

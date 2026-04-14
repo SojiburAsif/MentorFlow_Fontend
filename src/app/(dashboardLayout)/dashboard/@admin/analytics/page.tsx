@@ -1,5 +1,7 @@
 import { getAdminAnalytics, getDashboardStats } from "@/services/analytics.service";
 import { BarChart2, Users, CalendarCheck, BookOpen, TrendingUp } from "lucide-react";
+import DonutChart from "@/components/module/charts/DonutChart";
+import SparkBarChart from "@/components/module/charts/SparkBarChart";
 
 function MetricRow({ label, value }: { label: string; value: string | number }) {
   return (
@@ -20,6 +22,29 @@ export default async function AdminAnalyticsPage() {
   const d = analytics ?? stats ?? {};
 
   const revenue = d.totalRevenue != null ? `৳${Number(d.totalRevenue).toLocaleString()}` : "—";
+  const avgRevenue = d.avgRevenuePerBooking != null ? `৳${Number(d.avgRevenuePerBooking).toLocaleString()}` : "—";
+  const avgRating = d.avgRating != null ? `${Number(d.avgRating).toFixed(1)} ★` : "—";
+
+  const userChart = [
+    { label: "Tutors", value: Number(d.totalTutors ?? 0), color: "#3b82f6" },
+    { label: "Students", value: Number(d.totalStudents ?? 0), color: "#22c55e" },
+    { label: "Active", value: Number(d.activeUsers ?? 0), color: "#f59e0b" },
+  ];
+
+  const bookingChart = [
+    { label: "Pending", value: Number(d.pendingBookings ?? 0) + Number(d.pendingConfirmationBookings ?? 0), color: "#eab308" },
+    { label: "Completed", value: Number(d.completedBookings ?? 0), color: "#10b981" },
+    { label: "Cancelled", value: Number(d.cancelledBookings ?? 0), color: "#ef4444" },
+  ];
+
+  const momentumSeries = [
+    { label: "Users", value: Number(d.totalUsers ?? 0) },
+    { label: "Bookings", value: Number(d.totalBookings ?? 0) },
+    { label: "Reviews", value: Number(d.totalReviews ?? 0) },
+    { label: "Categories", value: Number(d.totalCategories ?? 0) },
+    { label: "Active", value: Number(d.activeUsers ?? 0) },
+    { label: "Tutors", value: Number(d.totalTutors ?? 0) },
+  ];
 
   return (
     <div className="min-h-screen bg-[#07070f] text-white">
@@ -35,7 +60,64 @@ export default async function AdminAnalyticsPage() {
         </div>
       </div>
 
-      <div className="px-8 py-8 grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="px-8 py-8 space-y-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
+          <div className="bg-[#0d0d1a] border border-blue-900/15 rounded-2xl p-5">
+            <p className="text-xs text-slate-400">Total users</p>
+            <p className="text-2xl font-black text-white mt-2">{d.totalUsers ?? "—"}</p>
+            <p className="text-[11px] text-slate-500 mt-1">Tutors + Students</p>
+          </div>
+          <div className="bg-[#0d0d1a] border border-indigo-900/15 rounded-2xl p-5">
+            <p className="text-xs text-slate-400">Total bookings</p>
+            <p className="text-2xl font-black text-white mt-2">{d.totalBookings ?? "—"}</p>
+            <p className="text-[11px] text-slate-500 mt-1">All sessions on platform</p>
+          </div>
+          <div className="bg-[#0d0d1a] border border-cyan-900/15 rounded-2xl p-5">
+            <p className="text-xs text-slate-400">Total revenue</p>
+            <p className="text-2xl font-black text-white mt-2">{revenue}</p>
+            <p className="text-[11px] text-slate-500 mt-1">Avg/booking: {avgRevenue}</p>
+          </div>
+          <div className="bg-[#0d0d1a] border border-violet-900/15 rounded-2xl p-5">
+            <p className="text-xs text-slate-400">Average rating</p>
+            <p className="text-2xl font-black text-white mt-2">{avgRating}</p>
+            <p className="text-[11px] text-slate-500 mt-1">From {d.totalReviews ?? 0} reviews</p>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="bg-[#0d0d1a] border border-blue-900/15 rounded-2xl p-6">
+            <div className="flex items-center gap-2 mb-4">
+              <Users size={16} className="text-blue-400" />
+              <h2 className="text-sm font-bold text-white">Users distribution</h2>
+            </div>
+            <DonutChart data={userChart} />
+          </div>
+
+          <div className="bg-[#0d0d1a] border border-indigo-900/15 rounded-2xl p-6">
+            <div className="flex items-center gap-2 mb-4">
+              <CalendarCheck size={16} className="text-indigo-400" />
+              <h2 className="text-sm font-bold text-white">Booking status split</h2>
+            </div>
+            <DonutChart data={bookingChart} />
+          </div>
+        </div>
+
+        <div className="bg-[#0d0d1a] border border-blue-900/15 rounded-2xl p-6">
+          <div className="flex items-center gap-2 mb-4">
+            <TrendingUp size={16} className="text-cyan-400" />
+            <h2 className="text-sm font-bold text-white">Platform momentum</h2>
+          </div>
+          <SparkBarChart data={momentumSeries} barColor="#3b82f6" height={84} />
+          <div className="mt-3 flex flex-wrap gap-2">
+            {momentumSeries.map((s) => (
+              <span key={s.label} className="text-[11px] px-2 py-1 rounded-lg border border-blue-900/20 bg-black/20 text-slate-300">
+                {s.label}: <span className="font-black text-white">{s.value}</span>
+              </span>
+            ))}
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Users card */}
         <div className="bg-[#0d0d1a] border border-blue-900/15 rounded-2xl p-6">
           <div className="flex items-center gap-2 mb-4">
@@ -67,7 +149,7 @@ export default async function AdminAnalyticsPage() {
             <h2 className="text-sm font-bold text-white">Revenue</h2>
           </div>
           <MetricRow label="Total Revenue"   value={revenue} />
-          <MetricRow label="Avg. Per Booking" value={d.avgRevenuePerBooking != null ? `৳${Number(d.avgRevenuePerBooking).toLocaleString()}` : "—"} />
+          <MetricRow label="Avg. Per Booking" value={avgRevenue} />
         </div>
 
         {/* Categories card */}
@@ -78,8 +160,9 @@ export default async function AdminAnalyticsPage() {
           </div>
           <MetricRow label="Total Categories" value={d.totalCategories ?? "—"} />
           <MetricRow label="Total Reviews"    value={d.totalReviews ?? "—"} />
-          <MetricRow label="Avg. Rating"      value={d.avgRating != null ? `${Number(d.avgRating).toFixed(1)} ★` : "—"} />
+          <MetricRow label="Avg. Rating"      value={avgRating} />
         </div>
+      </div>
       </div>
     </div>
   );

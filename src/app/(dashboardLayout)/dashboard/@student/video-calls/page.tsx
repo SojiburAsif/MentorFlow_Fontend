@@ -8,36 +8,28 @@ export default async function StudentVideoCallsPage() {
   const bookings: any[] = result.success ? (Array.isArray(result.data) ? result.data : []) : [];
 
   const videoBookings = bookings.filter((b) => {
-    // show confirmed sessions too (even if url not created yet)
-    const status = String(b?.status ?? "");
-    const pay = String(b?.paymentStatus ?? "");
-    const url = b?.videoSession?.sessionUrl;
-    const hasRoom = typeof url === "string" && url.startsWith("http");
-    const isConfirmed = status === "CONFIRMED" || status === "ATTENDED";
-    const isPaid = pay === "PAID";
-    const isDone = status === "COMPLETED" || status === "CANCELLED";
-    if (isDone) return false;
-    return hasRoom || (isConfirmed && isPaid);
+    return b?.status === "CONFIRMED" && b?.videoCallId;
   });
 
   return (
-    <div className="min-h-screen bg-[#07070f] text-white">
-      <div className="border-b border-sky-900/20 bg-[#0a0a14] px-8 py-5">
+    <div className="min-h-screen bg-background text-foreground transition-colors duration-300">
+      <header className="border-b bg-card/50 backdrop-blur-md sticky top-0 z-10 px-4 md:px-8 py-4">
         <div className="flex items-center gap-3">
-          <div className="p-2 bg-sky-600/20 rounded-lg">
-            <Video size={18} className="text-sky-400" />
+          <div className="p-2.5 bg-blue-600/10 rounded-xl">
+            <Video size={22} className="text-blue-600 dark:text-blue-400" />
           </div>
           <div>
-            <h1 className="text-lg font-bold text-white">Video Calls</h1>
-            <p className="text-xs text-slate-500">{videoBookings.length} available room{videoBookings.length !== 1 ? "s" : ""}</p>
+            <h1 className="text-xl font-bold tracking-tight">Join Meeting</h1>
+            <p className="text-xs text-muted-foreground font-medium">
+              {videoBookings.length} session{videoBookings.length !== 1 ? "s" : ""} ready to join
+            </p>
           </div>
         </div>
-      </div>
+      </header>
 
-      <div className="px-8 py-8">
+      <main className="container mx-auto p-4 md:p-8">
         <VideoCallsClient bookings={videoBookings} />
-      </div>
+      </main>
     </div>
   );
 }
-

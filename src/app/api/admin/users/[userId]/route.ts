@@ -34,16 +34,46 @@ export async function PATCH(req: Request, ctx: { params: Promise<{ userId: strin
   if (!token) return NextResponse.json({ success: false, message: "Unauthorized" }, { status: 401 });
 
   const body = await req.json().catch(() => null);
-  if (!body || typeof body.status !== "string") {
-    return NextResponse.json({ success: false, message: "status is required" }, { status: 400 });
+  if (!body || (typeof body.status !== "string" && typeof body.tutorStatus !== "string")) {
+    return NextResponse.json({ success: false, message: "status or tutorStatus is required" }, { status: 400 });
   }
 
   const env = getServerEnv();
   try {
-    const upstream = await fetch(`${env.BASE_API_URL}/admin/users/${encodeURIComponent(userId)}`, {
+    const url =
+      typeof body.tutorStatus === "string"
+        ? `${env.BASE_API_URL}/admin/users/${encodeURIComponent(userId)}/tutor-status`
+        : `${env.BASE_API_URL}/admin/users/${encodeURIComponent(userId)}`;
+    const payload =
+      typeof body.tutorStatus === "string" ? { tutorStatus: body.tutorStatus } : { status: body.status };
+    const upstream = await fetch(url, {
       method: "PATCH",
       headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-      body: JSON.stringify({ status: body.status }),
+      body: JSON.stringify(payload),
+      cache: "no-store",
+    });
+    const data = await upstream.json().catch(() => ({ success: false, message: "Invalid server response" }));
+    return NextResponse.json(data, { status: upstream.status });
+  } catch {
+    return NextResponse.json(
+      { success: false, message: "Server unreachable. Please start backend and try again." },
+      { status: 503 }
+    );
+  }
+}
+
+export async function DELETE(_req: Request, ctx: { params: Promise<{ userId: string }> }) {
+  const { userId } = await ctx.params;
+
+  const cookieStore = await cookies();
+  const token = cookieStore.get("accessToken")?.value;
+  if (!token) return NextResponse.json({ success: false, message: "Unauthorized" }, { status: 401 });
+
+  const env = getServerEnv();
+  try {
+    const upstream = await fetch(`${env.BASE_API_URL}/admin/users/${encodeURIComponent(userId)}`, {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
       cache: "no-store",
     });
     const data = await upstream.json().catch(() => ({ success: false, message: "Invalid server response" }));

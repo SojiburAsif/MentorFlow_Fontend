@@ -9,6 +9,8 @@ import {
   MonitorDot,
   Monitor,
   TicketPercent,
+  Video,
+  Clock3,
   LucideIcon
 } from "lucide-react";
 
@@ -61,6 +63,16 @@ export const adminRoutes: Route[] = [
         title: "All Bookings",
         url: "/dashboard/bookings",
         icon: CalendarCheck,
+      },
+      {
+        title: "Video Calls",
+        url: "/dashboard/video-calls",
+        icon: Video,
+      },
+      {
+        title: "All Slots",
+        url: "/dashboard/slots",
+        icon: Clock3,
       },
     ],
   },
