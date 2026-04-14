@@ -14,7 +14,7 @@ export default function SectionHero() {
     <section className="relative min-h-screen w-full bg-white dark:bg-black flex flex-col justify-center items-center overflow-hidden px-6 lg:px-12 transition-colors duration-500">
       
       {/* Background Glow Effect */}
-      <div className="absolute top-[30%] left-[10%] w-[500px] h-[500px] bg-blue-600/20 dark:bg-blue-600/10 blur-[120px] rounded-full z-0" />
+      <div className="absolute top-[30%] left-[10%] w-[500px] h-[500px]  dark:bg-blue-600/10 blur-[120px] rounded-full z-0" />
 
       {/* Floating Education Logos (Animated) */}
       <div className="absolute inset-0 z-0 pointer-events-none opacity-20 dark:opacity-30">

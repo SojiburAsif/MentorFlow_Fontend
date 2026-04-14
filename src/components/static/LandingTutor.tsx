@@ -80,7 +80,7 @@ function TutorCard({ tutor }: { tutor: Tutor }) {
     <motion.div variants={itemVariants}>
       <Link
         href={tutorId ? `/tutors/${tutorId}` : "#"}
-        className="group relative flex h-full min-h-[440px] flex-col overflow-hidden rounded-[40px] border border-white/5 bg-zinc-900/30 p-8 shadow-xl transition-all duration-500 hover:-translate-y-2 hover:border-blue-500/30 hover:shadow-blue-500/10"
+        className="group relative flex h-full min-h-[440px] flex-col overflow-hidden rounded-[40px] border border-slate-200 dark:border-white/5 bg-white dark:bg-zinc-900/30 p-8 shadow-sm dark:shadow-xl transition-all duration-500 hover:-translate-y-2 hover:border-blue-500/30 hover:shadow-blue-500/10"
       >
         <div className="absolute -right-4 -top-4 text-blue-500/5 transition-colors group-hover:text-blue-500/10">
           <GraduationCap size={120} strokeWidth={1} />
@@ -92,67 +92,66 @@ function TutorCard({ tutor }: { tutor: Tutor }) {
             <img
               src={image}
               alt={name}
-              className="relative h-20 w-20 rounded-3xl object-cover ring-2 ring-white/10"
+              className="relative h-20 w-20 rounded-3xl object-cover ring-2 ring-slate-100 dark:ring-white/10"
             />
           </div>
-          <div className="rounded-full bg-white/5 p-2.5 text-blue-400 opacity-0 transition-all group-hover:opacity-100">
+          <div className="rounded-full bg-slate-100 dark:bg-white/5 p-2.5 text-blue-500 dark:text-blue-400 opacity-0 transition-all group-hover:opacity-100">
             <ArrowUpRight size={18} />
           </div>
         </div>
 
         <div className="relative z-10 mt-8 flex-grow space-y-5">
           <div>
-            <h3 className="text-2xl font-semibold text-white transition-colors group-hover:text-blue-400">
+            <h3 className="text-2xl font-semibold text-slate-900 dark:text-white transition-colors group-hover:text-blue-600 dark:group-hover:text-blue-400">
               {name}
             </h3>
             
-            {/* Highlighted Categories Style */}
             <div className="mt-3 flex flex-wrap gap-2">
               {tutorCategories.length > 0 ? (
                 tutorCategories.map((c: string) => (
                   <span 
                     key={c} 
-                    className="rounded-lg border border-white/10 bg-white/5 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-blue-400 transition-colors group-hover:border-blue-500/20 group-hover:bg-blue-500/10"
+                    className="rounded-lg border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-white/5 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-blue-600 dark:text-blue-400 transition-colors group-hover:border-blue-500/20 group-hover:bg-blue-500/10"
                   >
                     {c}
                   </span>
                 ))
               ) : (
-                <span className="rounded-lg border border-white/10 bg-white/5 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-zinc-500">
+                <span className="rounded-lg border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-white/5 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-zinc-500">
                   Mentor
                 </span>
               )}
             </div>
           </div>
 
-          <p className="line-clamp-3 text-sm leading-relaxed text-zinc-400">
+          <p className="line-clamp-3 text-sm leading-relaxed text-slate-600 dark:text-zinc-400">
             {tutor.bio || "Professional mentor dedicated to providing personalized learning experiences and academic excellence."}
           </p>
         </div>
 
         <div className="relative z-10 mt-auto pt-8">
-          <div className="grid grid-cols-2 gap-4 border-t border-white/5 pt-6">
+          <div className="grid grid-cols-2 gap-4 border-t border-slate-100 dark:border-white/5 pt-6">
             <div className="space-y-1">
-              <span className="text-[10px] font-medium uppercase tracking-wider text-zinc-500">Rating</span>
-              <div className="flex items-center gap-1.5 text-sm font-semibold text-white">
+              <span className="text-[10px] font-medium uppercase tracking-wider text-slate-500 dark:text-zinc-500">Rating</span>
+              <div className="flex items-center gap-1.5 text-sm font-semibold text-slate-900 dark:text-white">
                 <Star className="h-4 w-4 fill-blue-500 text-blue-500" />
                 {Number(ratingValue || 0).toFixed(1)}
               </div>
             </div>
             <div className="space-y-1">
-              <span className="text-[10px] font-medium uppercase tracking-wider text-zinc-500">Per Session</span>
-              <div className="text-sm font-semibold text-white">
+              <span className="text-[10px] font-medium uppercase tracking-wider text-slate-500 dark:text-zinc-500">Per Session</span>
+              <div className="text-sm font-semibold text-slate-900 dark:text-white">
                 ৳{Number(priceValue || 0).toLocaleString()}
               </div>
             </div>
           </div>
 
-          <div className="mt-6 flex items-center justify-between rounded-2xl bg-white/5 px-5 py-3.5 transition group-hover:bg-blue-600/10 group-hover:ring-1 group-hover:ring-blue-500/20">
-            <div className="flex items-center gap-2 text-xs font-medium text-zinc-300">
-              <ShieldCheck size={16} className="text-blue-400" />
+          <div className="mt-6 flex items-center justify-between rounded-2xl bg-slate-50 dark:bg-white/5 px-5 py-3.5 transition group-hover:bg-blue-600/5 dark:group-hover:bg-blue-600/10 group-hover:ring-1 group-hover:ring-blue-500/20">
+            <div className="flex items-center gap-2 text-xs font-medium text-slate-600 dark:text-zinc-300">
+              <ShieldCheck size={16} className="text-blue-500 dark:text-blue-400" />
               Verified Profile
             </div>
-            <ArrowUpRight size={14} className="text-blue-400" />
+            <ArrowUpRight size={14} className="text-blue-500 dark:text-blue-400" />
           </div>
         </div>
       </Link>
@@ -169,8 +168,9 @@ export default async function LandingTutor() {
     .slice(0, 6);
 
   return (
-    <section className="relative overflow-hidden bg-black text-white">
-      <div className="pointer-events-none absolute left-1/4 top-0 h-96 w-96 rounded-full bg-blue-600/10 blur-[120px]" />
+    <section className="relative overflow-hidden bg-white dark:bg-black text-slate-900 dark:text-white transition-colors duration-300">
+      {/* Background Glow */}
+      <div className="pointer-events-none absolute left-1/4 top-0 h-96 w-96 rounded-full bg-blue-500/10 dark:bg-blue-600/10 blur-[120px]" />
       
       <div className="relative z-10 mx-auto max-w-7xl px-4 py-24 sm:px-6 lg:px-8">
         <motion.div 
@@ -180,14 +180,14 @@ export default async function LandingTutor() {
           className="mb-16 flex flex-col items-center text-center lg:flex-row lg:items-end lg:justify-between lg:text-left"
         >
           <div className="max-w-2xl">
-            <motion.div variants={textVariants} className="mb-4 inline-flex items-center gap-2 rounded-full border border-blue-500/20 bg-blue-500/5 px-4 py-1.5 text-[12px] font-medium uppercase tracking-widest text-blue-400">
+            <motion.div variants={textVariants} className="mb-4 inline-flex items-center gap-2 rounded-full border border-blue-500/20 bg-blue-500/5 px-4 py-1.5 text-[12px] font-medium uppercase tracking-widest text-blue-600 dark:text-blue-400">
               <Sparkles size={14} />
               Expert Mentors
             </motion.div>
-            <h2 className="text-4xl font-semibold tracking-tight sm:text-5xl lg:text-6xl">
-              Meet our top <span className="text-blue-500">mentors</span>
+            <h2 className="text-4xl font-semibold tracking-tight sm:text-5xl lg:text-6xl text-slate-900 dark:text-white">
+              Meet our top <span className="text-blue-600 dark:text-blue-500">mentors</span>
             </h2>
-            <p className="mt-6 text-zinc-400 sm:text-lg">
+            <p className="mt-6 text-slate-600 dark:text-zinc-400 sm:text-lg">
               Handpicked tutors ready to help you grow faster with focused, practical, and personalized learning.
             </p>
           </div>
@@ -195,7 +195,7 @@ export default async function LandingTutor() {
           <div className="mt-10 lg:mt-0">
             <Link
               href="/tutors"
-              className="inline-flex h-12 items-center justify-center rounded-2xl bg-white px-8 text-sm font-semibold text-black transition-all hover:bg-zinc-200 active:scale-95"
+              className="inline-flex h-12 items-center justify-center rounded-2xl bg-slate-900 dark:bg-white px-8 text-sm font-semibold text-white dark:text-black shadow-lg transition-all hover:bg-slate-800 dark:hover:bg-zinc-200 active:scale-95"
             >
               View all tutors
             </Link>
@@ -203,8 +203,8 @@ export default async function LandingTutor() {
         </motion.div>
 
         {topTutors.length === 0 ? (
-          <div className="rounded-[40px] border border-white/5 bg-zinc-900/20 py-20 text-center">
-            <p className="text-zinc-500">No mentors found matching your criteria.</p>
+          <div className="rounded-[40px] border border-slate-100 dark:border-white/5 bg-slate-50/50 dark:bg-zinc-900/20 py-20 text-center">
+            <p className="text-slate-500 dark:text-zinc-500">No mentors found matching your criteria.</p>
           </div>
         ) : (
           <motion.div

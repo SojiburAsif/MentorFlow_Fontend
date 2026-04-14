@@ -1,6 +1,7 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 import React, { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, Variants } from "framer-motion";
 import {
     Languages,
     Palette,
@@ -33,24 +34,21 @@ const categories = [
 ];
 
 const CategorySection = () => {
-    const [selectedCategory, setSelectedCategory] = useState(null);
+    const [selectedCategory, setSelectedCategory] = useState<any>(null);
 
-    // --- Animation Definitions ---
-
-    // Container jeta tar bacchader (children) staggered delay debe
-    const containerVariants = {
+    // --- Animation Definitions (Error Fixed) ---
+    const containerVariants: Variants = {
         hidden: { opacity: 0 },
         visible: {
             opacity: 1,
             transition: {
-                staggerChildren: 0.15, // Protiti card-er majhe delay
+                staggerChildren: 0.15,
                 delayChildren: 0.1,
             },
         },
     };
 
-    // Protiti item-er scroll motion (Fade up with Spring)
-    const itemVariants = {
+    const itemVariants: Variants = {
         hidden: { 
             opacity: 0, 
             y: 60,
@@ -61,21 +59,24 @@ const CategorySection = () => {
             y: 0,
             scale: 1,
             transition: {
-                type: "spring", // Spring type motion
-                damping: 20,    // Bouncing control
-                stiffness: 100, // Speed control
+                type: "spring" as const,
+                damping: 20,
+                stiffness: 100,
                 duration: 0.8
             },
         },
     };
 
-    // Header text-er jonno side theke ashar motion
-    const headerVariants = {
+    const headerVariants: Variants = {
         hidden: { opacity: 0, x: -30 },
         visible: { 
             opacity: 1, 
             x: 0,
-            transition: { type: "spring", stiffness: 50, duration: 1 }
+            transition: { 
+                type: "spring" as const, 
+                stiffness: 50, 
+                duration: 1 
+            }
         }
     };
 
@@ -85,21 +86,21 @@ const CategorySection = () => {
                 className="container mx-auto px-6 max-w-7xl"
                 initial="hidden"
                 whileInView="visible"
-                viewport={{ once: true, amount: 0.1 }} // 10% view-te ashlei animation shuru hobe
+                viewport={{ once: true, amount: 0.1 }}
                 variants={containerVariants}
             >
                 
                 {/* Header Section */}
                 <div className="flex flex-col md:flex-row md:items-end justify-between mb-20 gap-8">
                     <motion.div variants={headerVariants} className="max-w-3xl">
-                        <span className="text-blue-600 font-bold tracking-widest uppercase text-sm mb-4 block">
+                        <span className="text-blue-600 dark:text-blue-500 font-bold tracking-widest uppercase text-sm mb-4 block">
                             Our Categories
                         </span>
                         <h2 className="text-4xl md:text-7xl font-bold text-slate-900 dark:text-white mb-8 tracking-tighter leading-tight">
                             Explore 4,000+ Free <br />
-                            <span className="text-blue-600">Online Courses</span>
+                            <span className="text-blue-600 dark:text-blue-500">Online Courses</span>
                         </h2>
-                        <p className="text-slate-500 dark:text-zinc-400 text-lg md:text-xl max-w-xl font-normal leading-relaxed">
+                        <p className="text-slate-600 dark:text-zinc-400 text-lg md:text-xl max-w-xl font-normal leading-relaxed">
                             Unlock your potential with our high-quality education catalog designed for the modern student.
                         </p>
                     </motion.div>
@@ -122,21 +123,19 @@ const CategorySection = () => {
                             key={index}
                             variants={itemVariants}
                             onClick={() => setSelectedCategory(cat)}
-                            className={`group cursor-default p-10 rounded-[40px] border transition-all duration-500 relative overflow-hidden flex flex-col h-full shadow-lg ${
+                            className={`group cursor-pointer p-10 rounded-[40px] border transition-all duration-500 relative overflow-hidden flex flex-col h-full shadow-lg ${
                                 cat.variant === "blue"
                                     ? "bg-blue-600 border-blue-600 text-white shadow-blue-500/20"
-                                    : "bg-zinc-950 border-blue-500/30 text-white hover:border-blue-500"
+                                    : "bg-slate-50 dark:bg-zinc-950 border-slate-200 dark:border-blue-500/30 text-slate-900 dark:text-white hover:border-blue-500 shadow-slate-200/50 dark:shadow-none"
                             }`}
                         >
-                            {/* Static Background Glow */}
                             <div className="absolute -right-10 -top-10 w-32 h-32 bg-blue-500/10 rounded-full blur-3xl pointer-events-none" />
 
-                            {/* Icon Wrapper - No Scale on Hover, only Color change */}
                             <div 
                                 className={`w-16 h-16 rounded-2xl flex items-center justify-center mb-10 shadow-lg transition-all duration-300 ${
                                     cat.variant === "blue" 
                                     ? "bg-white/20 text-white backdrop-blur-md" 
-                                    : "bg-zinc-900 text-blue-500 border border-blue-500/20 group-hover:bg-blue-600 group-hover:text-white group-hover:border-blue-600"
+                                    : "bg-white dark:bg-zinc-900 text-blue-600 dark:text-blue-500 border border-slate-100 dark:border-blue-500/20 group-hover:bg-blue-600 group-hover:text-white group-hover:border-blue-600"
                                 }`}
                             >
                                 {cat.icon}
@@ -147,13 +146,13 @@ const CategorySection = () => {
                             </h3>
 
                             <p className={`mb-10 text-base font-normal leading-relaxed flex-grow ${
-                                cat.variant === "blue" ? "text-blue-50/80" : "text-zinc-400"
+                                cat.variant === "blue" ? "text-blue-50/80" : "text-slate-600 dark:text-zinc-400"
                             }`}>
                                 {cat.desc}
                             </p>
 
                             <div className={`flex items-center gap-3 text-sm font-bold uppercase tracking-[0.2em] transition-colors ${
-                                cat.variant === "blue" ? "text-white" : "text-blue-500 group-hover:text-blue-400"
+                                cat.variant === "blue" ? "text-white" : "text-blue-600 dark:text-blue-500 group-hover:text-blue-700 dark:group-hover:text-blue-400"
                             }`}>
                                 Explore <ArrowRight size={20} />
                             </div>
@@ -162,7 +161,7 @@ const CategorySection = () => {
                 </div>
             </motion.div>
 
-            {/* --- MODAL SECTION (Spring Animation) --- */}
+            {/* --- MODAL SECTION --- */}
             <AnimatePresence>
                 {selectedCategory && (
                     <div className="fixed inset-0 z-[100] flex items-center justify-center p-6">
@@ -171,7 +170,7 @@ const CategorySection = () => {
                             animate={{ opacity: 1 }}
                             exit={{ opacity: 0 }}
                             onClick={() => setSelectedCategory(null)}
-                            className="absolute inset-0 bg-black/95 backdrop-blur-md"
+                            className="absolute inset-0 bg-slate-900/60 dark:bg-black/95 backdrop-blur-md"
                         />
 
                         <motion.div 
@@ -180,14 +179,14 @@ const CategorySection = () => {
                                 opacity: 1, 
                                 scale: 1, 
                                 y: 0,
-                                transition: { type: "spring", damping: 25, stiffness: 300 } 
+                                transition: { type: "spring" as const, damping: 25, stiffness: 300 } 
                             }}
                             exit={{ opacity: 0, scale: 0.8, y: 50 }}
-                            className="relative w-full max-w-lg bg-zinc-900 rounded-[40px] p-10 shadow-2xl border border-zinc-800"
+                            className="relative w-full max-w-lg bg-white dark:bg-zinc-900 rounded-[40px] p-10 shadow-2xl border border-slate-200 dark:border-zinc-800"
                         >
                             <button 
                                 onClick={() => setSelectedCategory(null)}
-                                className="absolute top-8 right-8 p-3 rounded-full bg-zinc-800 text-white hover:bg-blue-600 transition-colors"
+                                className="absolute top-8 right-8 p-3 rounded-full bg-slate-100 dark:bg-zinc-800 text-slate-900 dark:text-white hover:bg-blue-600 hover:text-white transition-colors"
                             >
                                 <X size={20} />
                             </button>
@@ -196,13 +195,13 @@ const CategorySection = () => {
                                 <motion.div 
                                     initial={{ scale: 0 }}
                                     animate={{ scale: 1 }}
-                                    transition={{ type: "spring", delay: 0.2 }}
+                                    transition={{ type: "spring" as const, delay: 0.2 }}
                                     className="w-20 h-20 rounded-3xl bg-blue-600 text-white flex items-center justify-center mb-8 shadow-2xl"
                                 >
                                     {selectedCategory.icon}
                                 </motion.div>
-                                <h3 className="text-3xl font-bold mb-4 text-white">{selectedCategory.title}</h3>
-                                <p className="text-zinc-400 text-lg mb-10 leading-relaxed">
+                                <h3 className="text-3xl font-bold mb-4 text-slate-900 dark:text-white">{selectedCategory.title}</h3>
+                                <p className="text-slate-600 dark:text-zinc-400 text-lg mb-10 leading-relaxed">
                                     {selectedCategory.desc}
                                 </p>
                                 
@@ -215,7 +214,6 @@ const CategorySection = () => {
                 )}
             </AnimatePresence>
 
-            {/* Bottom Gradient Scroll Progress Line */}
             <motion.div 
                 initial={{ scaleX: 0 }}
                 whileInView={{ scaleX: 1 }}
