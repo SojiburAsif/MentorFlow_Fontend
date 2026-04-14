@@ -1,5 +1,6 @@
+import FooterPage from "@/components/module/Fooder/fooder";
 import Navbar from "@/components/shared/Navbar/Navbar";
-import Footer from "@/components/shared/footer/Footer";
+
 
 export default function CommonLayout({
   children,
@@ -12,7 +13,7 @@ export default function CommonLayout({
       <main className="flex-1">
         {children}
       </main>
-      <Footer />
+      <FooterPage />
     </div>
   );
 }
