@@ -6,12 +6,14 @@ import { loginSchema, LoginFormValues } from "@/validations/auth.schema";
 import { useState } from "react";
 import { toast } from "sonner";
 import Link from "next/link";
+import { motion } from "framer-motion";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Loader2, Mail, Lock, ArrowRight } from "lucide-react";
 import { loginAction } from "@/services/auth.service";
+import MainLogo from "@/components/shared/logo/MainLogo";
 
 export default function LoginForm({ nextUrl }: { nextUrl?: string }) {
   const [isLoading, setIsLoading] = useState(false);
@@ -28,7 +30,7 @@ export default function LoginForm({ nextUrl }: { nextUrl?: string }) {
   async function onSubmit(data: LoginFormValues) {
     setIsLoading(true);
     const toastId = toast.loading("Verifying credentials...");
-    
+
     try {
       const res = await loginAction(data);
       if (res.success) {
@@ -45,61 +47,111 @@ export default function LoginForm({ nextUrl }: { nextUrl?: string }) {
   }
 
   return (
-    <div className="w-full max-w-md mx-auto">
-      <div className="p-8 bg-white dark:bg-zinc-950 rounded-3xl shadow-2xl border border-slate-200 dark:border-slate-800">
+    <motion.div
+      initial={{ opacity: 0, y: 40, scale: 0.95 }}
+      animate={{ opacity: 1, y: 0, scale: 1 }}
+      transition={{ duration: 0.5 }}
+      className="w-full max-w-md mx-auto relative z-10"
+    >
+      <div className="p-8 rounded-3xl border shadow-2xl backdrop-blur-xl 
+      bg-white/80 dark:bg-black/60 
+      border-slate-200 dark:border-white/10">
+
+        {/* HEADER */}
+        {/* HEADER */}
         <div className="mb-8 text-center">
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-blue-50 dark:bg-blue-900/20 text-blue-600 mb-4">
-            <Lock className="w-8 h-8" />
-          </div>
-          <h2 className="text-3xl font-black tracking-tight text-slate-900 dark:text-white">Welcome Back</h2>
-          <p className="text-sm text-slate-500 mt-2 font-medium">Please enter your details to sign in</p>
+          <motion.div
+            initial={{ scale: 0.8, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ duration: 0.4 }}
+            className="flex justify-center mb-4"
+          >
+           
+              <MainLogo />
+           
+          </motion.div>
+
+          <h2 className="text-3xl font-black tracking-tight text-slate-900 dark:text-white">
+            Welcome Back
+          </h2>
+          <p className="text-sm text-slate-500 mt-2">
+            Sign in to continue your journey 
+          </p>
         </div>
 
+
+        {/* FORM */}
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+          {/* EMAIL */}
           <div className="space-y-2">
-            <Label htmlFor="email" className="text-xs font-bold uppercase tracking-wider text-slate-500">Email Address</Label>
+            <Label className="text-xs font-bold text-slate-500 uppercase">
+              Email
+            </Label>
             <div className="relative">
               <Mail className="absolute left-3 top-3 h-4 w-4 text-slate-400" />
-              <Input 
-                id="email" 
-                placeholder="name@example.com" 
-                className="pl-10 h-11 bg-slate-50/50 dark:bg-slate-900/50 border-slate-200 dark:border-slate-800 focus:ring-2 focus:ring-blue-500" 
-                {...register("email")} 
+              <Input
+                placeholder="Enter Your Email"
+                className="pl-10 h-11 bg-white/70 dark:bg-black/40 border-slate-300 dark:border-white/10 focus:ring-2 focus:ring-blue-500"
+                {...register("email")}
               />
             </div>
-            {errors.email && <p className="text-xs font-medium text-red-500">{String(errors.email.message)}</p>}
+            {errors.email && (
+              <p className="text-xs text-red-500">{String(errors.email.message)}</p>
+            )}
           </div>
 
+          {/* PASSWORD */}
           <div className="space-y-2">
-            <div className="flex justify-between items-center">
-              <Label htmlFor="password" className="text-xs font-bold uppercase tracking-wider text-slate-500">Password</Label>
-              <Link href="#" className="text-xs font-bold text-blue-600 hover:underline">Forgot password?</Link>
+            <div className="flex justify-between">
+              <Label className="text-xs font-bold text-slate-500 uppercase">
+                Password
+              </Label>
+              <Link href="#" className="text-xs text-blue-500 hover:underline">
+                Forgot?
+              </Link>
             </div>
+
             <div className="relative">
               <Lock className="absolute left-3 top-3 h-4 w-4 text-slate-400" />
-              <Input 
-                id="password" 
-                type="password" 
-                placeholder="••••••••" 
-                className="pl-10 h-11 bg-slate-50/50 dark:bg-slate-900/50 border-slate-200 dark:border-slate-800 focus:ring-2 focus:ring-blue-500" 
-                {...register("password")} 
+              <Input
+                type="password"
+                placeholder="password"
+                className="pl-10 h-11 bg-white/70 dark:bg-black/40 border-slate-300 dark:border-white/10 focus:ring-2 focus:ring-blue-500"
+                {...register("password")}
               />
             </div>
-            {errors.password && <p className="text-xs font-medium text-red-500">{String(errors.password.message)}</p>}
+
+            {errors.password && (
+              <p className="text-xs text-red-500">{String(errors.password.message)}</p>
+            )}
           </div>
 
-          <Button type="submit" className="w-full h-12 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl shadow-lg shadow-blue-500/20 transition-all active:scale-[0.98]" disabled={isLoading}>
-            {isLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : <span className="flex items-center gap-2">Sign In <ArrowRight className="w-4 h-4" /></span>}
+          {/* BUTTON */}
+          <Button
+            type="submit"
+            className="w-full h-12 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl shadow-lg shadow-blue-500/20 transition active:scale-[0.97]"
+            disabled={isLoading}
+          >
+            {isLoading ? (
+              <Loader2 className="w-5 h-5 animate-spin" />
+            ) : (
+              <span className="flex items-center gap-2">
+                Sign In <ArrowRight className="w-4 h-4" />
+              </span>
+            )}
           </Button>
         </form>
 
-        <div className="mt-8 pt-6 border-t border-slate-100 dark:border-slate-900 text-center">
+        {/* FOOTER */}
+        <div className="mt-8 pt-6 border-t border-slate-200 dark:border-white/10 text-center">
           <p className="text-sm text-slate-500">
-            Don&apos;t have an account?{" "}
-            <Link href="/register" className="font-bold text-blue-600 hover:underline">Create an account</Link>
+            Don’t have an account?{" "}
+            <Link href="/register" className="text-blue-500 font-bold hover:underline">
+              Create one
+            </Link>
           </p>
         </div>
       </div>
-    </div>
+    </motion.div>
   );
 }

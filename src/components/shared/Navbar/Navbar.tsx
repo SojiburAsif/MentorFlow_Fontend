@@ -211,11 +211,11 @@ export default function Navbar() {
                                         </Dialog>
 
                                         <Dialog open={isPasswordModalOpen} onOpenChange={setIsPasswordModalOpen}>
-                                            <DialogTrigger asChild>
+                                            {/* <DialogTrigger asChild>
                                                 <button className="w-full flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
                                                     <Settings className="h-4 w-4 text-blue-500" /> Change Password
                                                 </button>
-                                            </DialogTrigger>
+                                            </DialogTrigger> */}
                                             <DialogContent className="sm:max-w-[425px]">
                                                 <DialogHeader>
                                                     <DialogTitle>Change Password</DialogTitle>
