@@ -1,6 +1,4 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-/* eslint-disable @next/next/no-img-element */
-
 import { cookies } from "next/headers";
 import { getAllTutors } from "@/services/tutor.service";
 import { getMyWishlist } from "@/services/wishlist.service";
@@ -28,6 +26,7 @@ export default async function TutorsPage({
     page,
     limit: "12",
   });
+
 
   const tutors: any[] = res.success ? (Array.isArray(res.data) ? res.data : []) : [];
 

@@ -2,126 +2,157 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { Clock, LayoutList, Table2 } from "lucide-react";
+import { Clock, LayoutGrid, List, Calendar } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 
 function fmtDate(v?: string) {
   if (!v) return "—";
   const d = new Date(v);
-  if (Number.isNaN(d.getTime())) return v;
-  return d.toLocaleDateString(undefined, { year: "numeric", month: "short", day: "2-digit" });
+  return Number.isNaN(d.getTime()) ? v : d.toLocaleDateString(undefined, { 
+    weekday: 'short', year: "numeric", month: "short", day: "numeric" 
+  });
 }
 
 function fmtTime(v?: string) {
   if (!v) return "—";
   const d = new Date(v);
-  if (Number.isNaN(d.getTime())) return v;
-  return d.toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit" });
+  return Number.isNaN(d.getTime()) ? v : d.toLocaleTimeString([], { 
+    hour: "2-digit", minute: "2-digit", hour12: true 
+  });
 }
 
 export default function SlotsListClient({ slots }: { slots: any[] }) {
   const [view, setView] = useState<"cards" | "table">("cards");
 
   const items = useMemo(() => {
-    const arr = Array.isArray(slots) ? slots.slice() : [];
-    arr.sort((a, b) => {
-      const ab = Boolean(a?.isBooked);
-      const bb = Boolean(b?.isBooked);
-      if (ab !== bb) return ab ? 1 : -1; // available first
-      const sa = a?.startTime ? new Date(a.startTime).getTime() : 0;
-      const sb = b?.startTime ? new Date(b.startTime).getTime() : 0;
-      return sa - sb;
+    const arr = [...slots];
+    return arr.sort((a, b) => {
+      const bookedA = Number(a?.isBooked || 0);
+      const bookedB = Number(b?.isBooked || 0);
+      if (bookedA !== bookedB) return bookedA - bookedB;
+      return new Date(a.startTime).getTime() - new Date(b.startTime).getTime();
     });
-    return arr;
   }, [slots]);
 
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-end gap-2">
+    <div className="space-y-6">
+      {/* View Switcher */}
+      <div className="flex items-center justify-end p-1 bg-slate-200/50 dark:bg-white/5 rounded-2xl w-fit ml-auto border border-slate-200 dark:border-white/5">
         <button
-          type="button"
           onClick={() => setView("cards")}
-          className={`h-10 px-3 rounded-xl border text-xs font-black inline-flex items-center gap-2 ${
-            view === "cards" ? "border-indigo-500/30 bg-indigo-500/10 text-indigo-200" : "border-slate-200/10 bg-slate-500/10 text-slate-200"
+          className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all ${
+            view === "cards" 
+            ? "bg-white dark:bg-indigo-600 text-indigo-600 dark:text-white shadow-sm" 
+            : "text-slate-500 hover:text-slate-700 dark:hover:text-slate-300"
           }`}
         >
-          <LayoutList size={14} />
-          Cards
+          <LayoutGrid size={14} /> Cards
         </button>
         <button
-          type="button"
           onClick={() => setView("table")}
-          className={`h-10 px-3 rounded-xl border text-xs font-black inline-flex items-center gap-2 ${
-            view === "table" ? "border-indigo-500/30 bg-indigo-500/10 text-indigo-200" : "border-slate-200/10 bg-slate-500/10 text-slate-200"
+          className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all ${
+            view === "table" 
+            ? "bg-white dark:bg-indigo-600 text-indigo-600 dark:text-white shadow-sm" 
+            : "text-slate-500 hover:text-slate-700 dark:hover:text-slate-300"
           }`}
         >
-          <Table2 size={14} />
-          Table
+          <List size={14} /> Table
         </button>
       </div>
 
-      {view === "table" ? (
-        <div className="rounded-2xl border border-indigo-900/15 bg-[#0d0d1a] overflow-hidden">
-          <div className="overflow-auto">
-            <table className="min-w-[760px] w-full text-sm">
-              <thead className="bg-black/20 text-slate-400 text-xs">
-                <tr>
-                  <th className="text-left px-4 py-3 font-black">Date</th>
-                  <th className="text-left px-4 py-3 font-black">Start</th>
-                  <th className="text-left px-4 py-3 font-black">End</th>
-                  <th className="text-left px-4 py-3 font-black">Status</th>
-                </tr>
-              </thead>
-              <tbody>
-                {items.map((slot: any) => (
-                  <tr key={slot.id} className="border-t border-indigo-900/10">
-                    <td className="px-4 py-3 text-white font-semibold">{fmtDate(slot.date)}</td>
-                    <td className="px-4 py-3 text-slate-200">{fmtTime(slot.startTime)}</td>
-                    <td className="px-4 py-3 text-slate-200">{fmtTime(slot.endTime)}</td>
-                    <td className="px-4 py-3">
-                      <span
-                        className={`text-xs font-black px-2 py-1 rounded-full border ${
-                          slot.isBooked
-                            ? "bg-yellow-500/10 text-yellow-300 border-yellow-500/20"
-                            : "bg-emerald-500/10 text-emerald-300 border-emerald-500/20"
-                        }`}
-                      >
-                        {slot.isBooked ? "Booked" : "Available"}
-                      </span>
-                    </td>
+      <AnimatePresence mode="wait">
+        {view === "table" ? (
+          <motion.div 
+            key="table"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            className="rounded-3xl border border-slate-200 dark:border-indigo-900/20 bg-white dark:bg-[#0d0d1a] shadow-xl shadow-slate-200/50 dark:shadow-none overflow-hidden"
+          >
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm text-left">
+                <thead className="bg-slate-50 dark:bg-black/40 text-slate-500 dark:text-slate-400 text-[11px] uppercase tracking-widest font-black">
+                  <tr>
+                    <th className="px-6 py-4">Date</th>
+                    <th className="px-6 py-4">Duration</th>
+                    <th className="px-6 py-4 text-center">Status</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4">
-          {items.map((slot: any) => (
-            <div
-              key={slot.id}
-              className={`bg-[#0d0d1a] border rounded-2xl p-5 transition-all ${
-                slot.isBooked ? "border-yellow-500/20 opacity-60" : "border-indigo-500/15 hover:border-indigo-500/30"
-              }`}
-            >
-              <div className="flex items-center justify-between mb-3">
-                <Clock size={14} className="text-indigo-400" />
-                <span
-                  className={`text-xs font-black px-2 py-0.5 rounded-full border ${
-                    slot.isBooked ? "bg-yellow-500/10 text-yellow-300 border-yellow-500/20" : "bg-emerald-500/10 text-emerald-300 border-emerald-500/20"
-                  }`}
-                >
-                  {slot.isBooked ? "Booked" : "Available"}
-                </span>
-              </div>
-              <p className="text-sm font-bold text-white">{fmtDate(slot.date)}</p>
-              <p className="text-xs text-slate-500 mt-1">
-                {fmtTime(slot.startTime)} – {fmtTime(slot.endTime)}
-              </p>
+                </thead>
+                <tbody className="divide-y divide-slate-100 dark:divide-indigo-900/10">
+                  {items.map((slot: any) => (
+                    <tr key={slot.id} className="hover:bg-slate-50 dark:hover:bg-indigo-500/5 transition-colors">
+                      <td className="px-6 py-4 font-bold text-slate-700 dark:text-white">
+                        <div className="flex items-center gap-2">
+                          <Calendar size={14} className="text-indigo-500" />
+                          {fmtDate(slot.date)}
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 font-medium text-slate-500 dark:text-slate-300">
+                        {fmtTime(slot.startTime)} — {fmtTime(slot.endTime)}
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="flex justify-center">
+                          <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-tighter border ${
+                            slot.isBooked 
+                            ? "bg-amber-500/10 text-amber-600 border-amber-500/20" 
+                            : "bg-emerald-500/10 text-emerald-600 border-emerald-500/20"
+                          }`}>
+                            {slot.isBooked ? "Booked" : "Available"}
+                          </span>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
-          ))}
-        </div>
-      )}
+          </motion.div>
+        ) : (
+          <motion.div 
+            key="grid"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5"
+          >
+            {items.map((slot: any) => (
+              <div
+                key={slot.id}
+                className={`group relative bg-white dark:bg-[#0d0d1a] border rounded-[2rem] p-6 transition-all duration-300 ${
+                  slot.isBooked 
+                  ? "border-slate-100 dark:border-amber-500/10 opacity-75" 
+                  : "border-slate-200 dark:border-indigo-500/15 hover:border-indigo-500/40 hover:shadow-2xl hover:shadow-indigo-500/10"
+                }`}
+              >
+                <div className="flex items-center justify-between mb-5">
+                  <div className={`p-2 rounded-xl ${slot.isBooked ? 'bg-slate-100 dark:bg-amber-500/10' : 'bg-indigo-50 dark:bg-indigo-500/10'}`}>
+                    <Clock size={16} className={slot.isBooked ? "text-amber-500" : "text-indigo-500"} />
+                  </div>
+                  <span className={`text-[10px] font-black px-3 py-1 rounded-full border tracking-wide uppercase ${
+                    slot.isBooked 
+                    ? "bg-amber-500/10 text-amber-600 border-amber-500/10" 
+                    : "bg-emerald-500/10 text-emerald-600 border-emerald-500/10"
+                  }`}>
+                    {slot.isBooked ? "Booked" : "Open"}
+                  </span>
+                </div>
+                
+                <h4 className="text-[15px] font-black text-slate-800 dark:text-white mb-1">
+                  {fmtDate(slot.date)}
+                </h4>
+                <p className="text-xs font-bold text-slate-400 dark:text-slate-500">
+                  {fmtTime(slot.startTime)} – {fmtTime(slot.endTime)}
+                </p>
+
+                {!slot.isBooked && (
+                  <div className="absolute bottom-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <div className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
+                  </div>
+                )}
+              </div>
+            ))}
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
-
