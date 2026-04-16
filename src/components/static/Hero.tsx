@@ -195,7 +195,7 @@ export default function SectionHero(): React.ReactElement {
 
         </motion.div>
 
-        {/* Bottom Fade */}
+
         <div className="absolute bottom-0 left-0 right-0 h-40 bg-gradient-to-t from-white dark:from-[#020617] to-transparent pointer-events-none" />
       </motion.div>
     </section>
