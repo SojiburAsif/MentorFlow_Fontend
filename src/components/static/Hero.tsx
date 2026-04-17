@@ -137,7 +137,6 @@ export default function SectionHero(): React.ReactElement {
             </motion.span>
           </motion.div>
 
-          {/* Heading */}
           <motion.h1 
             variants={fadeInUp}
             className="text-5xl md:text-[100px] font-medium tracking-tighter text-slate-950 dark:text-white leading-[0.95]"
@@ -166,7 +165,6 @@ export default function SectionHero(): React.ReactElement {
             Mentorship
           </motion.h1>
 
-          {/* Description */}
           <motion.p 
             variants={fadeInUp}
             className="mt-12 max-w-3xl mx-auto text-slate-500 dark:text-slate-400 text-lg md:text-xl font-normal leading-relaxed tracking-tight"
@@ -176,7 +174,7 @@ export default function SectionHero(): React.ReactElement {
             high-impact digital experiences.
           </motion.p>
 
-          {/* CTAs */}
+    
           <motion.div 
             variants={fadeInUp}
             className="mt-14 flex flex-col sm:flex-row items-center justify-center gap-6"
