@@ -14,6 +14,7 @@ import {
     ArrowUp,
     Globe,
 } from "lucide-react";
+import MainLogo from "@/components/shared/logo/MainLogo";
 
 // Type-safe floating variants
 const floatingVariants = {
@@ -87,7 +88,7 @@ const FooterPage = () => {
                                 <GraduationCap size={28} />
                             </div>
                             <h2 className="text-3xl font-black tracking-tight text-slate-900 dark:text-white">
-                                SkillBridge
+                                <MainLogo></MainLogo>
                             </h2>
                         </div>
                         <p className="text-slate-500 dark:text-slate-400 leading-relaxed font-medium">
