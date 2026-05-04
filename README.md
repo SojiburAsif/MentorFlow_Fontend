@@ -1,8 +1,58 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# MentorFlow Frontend
+
+Welcome to the **MentorFlow Frontend** repository! MentorFlow is an educational mentoring platform designed to connect students with expert tutors. This project is built using modern web development tools and frameworks to ensure a highly responsive, performant, and accessible user experience.
+
+## Tech Stack
+
+This project leverages the following technologies:
+
+- **Framework**: [Next.js](https://nextjs.org/) (App Router)
+- **Language**: [TypeScript](https://www.typescriptlang.org/)
+- **Styling**: [Tailwind CSS](https://tailwindcss.com/)
+- **UI Components**: [Shadcn UI](https://ui.shadcn.com/) / Radix UI
+- **Package Manager**: npm / yarn / pnpm / bun
+
+## Features
+
+- **Role-based Dashboards**: Custom interfaces for Admins, Tutors, and Students.
+- **Booking Management**: Streamlined scheduling and session tracking.
+- **User Management**: Admins can manage users, students, and tutors easily.
+- **Responsive Design**: Mobile-first architecture ensuring great user experience across all devices.
 
 ## Getting Started
 
-First, run the development server:
+Follow these steps to run the application locally:
+
+### Prerequisites
+
+Make sure you have Node.js installed on your machine. We recommend using `nvm` to manage Node versions.
+
+### Installation
+
+1. Clone the repository:
+   ```bash
+   git clone <repository-url>
+   ```
+
+2. Navigate into the project directory:
+   ```bash
+   cd mentorflow_fontend
+   ```
+
+3. Install the dependencies:
+   ```bash
+   npm install
+   # or
+   yarn install
+   # or
+   pnpm install
+   # or
+   bun install
+   ```
+
+### Development Server
+
+Start the local development server:
 
 ```bash
 npm run dev
@@ -14,23 +64,28 @@ pnpm dev
 bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000) with your browser to see the result. You can start editing the page by modifying files in the `src/app` directory. The page auto-updates as you edit the files.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Environment Variables
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+To run the project, you will need to set up your environment variables. Create a `.env.local` file in the root directory and configure it based on your backend and third-party API keys. 
 
-## Learn More
+Example:
+```env
+NEXT_PUBLIC_API_URL=http://localhost:5000/api
+```
 
-To learn more about Next.js, take a look at the following resources:
+## Project Structure
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- `src/app`: Contains the Next.js App Router structure, including pages, layouts, and API routes.
+- `src/components`: Reusable UI components.
+- `src/constants`: Application-wide constants and configurations.
+- `public`: Static assets like images and icons.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Contributing
 
-## Deploy on Vercel
+Contributions are welcome! Please feel free to submit a Pull Request.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## License
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+This project is licensed under the MIT License.

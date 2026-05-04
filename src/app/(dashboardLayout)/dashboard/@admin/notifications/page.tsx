@@ -7,22 +7,22 @@ export default async function AdminNotificationsPage() {
   const notifications: any[] = result.success ? (Array.isArray(result.data) ? result.data : []) : [];
 
   return (
-    <div className="min-h-screen bg-[#07070f] text-white">
-      <div className="border-b border-blue-900/20 bg-[#0a0a14] px-8 py-5">
+    <div className="min-h-screen bg-white dark:bg-black text-slate-900 dark:text-white">
+      <div className="border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-black px-8 py-5">
         <div className="flex items-center gap-3">
-          <div className="p-2 bg-blue-600/20 rounded-lg">
-            <Bell size={18} className="text-blue-400" />
+          <div className="p-2 bg-blue-100 dark:bg-blue-600/20 rounded-lg">
+            <Bell size={18} className="text-blue-600 dark:text-blue-400" />
           </div>
           <div>
-            <h1 className="text-lg font-bold text-white">Notifications</h1>
-            <p className="text-xs text-slate-500">{notifications.length} notification{notifications.length !== 1 ? "s" : ""}</p>
+            <h1 className="text-lg font-bold text-slate-900 dark:text-white">Notifications</h1>
+            <p className="text-xs text-slate-600 dark:text-slate-400">{notifications.length} notification{notifications.length !== 1 ? "s" : ""}</p>
           </div>
         </div>
       </div>
 
       <div className="px-8 py-8">
         {notifications.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-24 text-slate-600">
+          <div className="flex flex-col items-center justify-center py-24 text-slate-500 dark:text-slate-600">
             <Bell size={40} className="mb-3 opacity-30" />
             <p className="text-sm">No notifications</p>
           </div>
@@ -31,20 +31,22 @@ export default async function AdminNotificationsPage() {
             {notifications.map((n: any) => (
               <div
                 key={n.id}
-                className={`bg-[#0d0d1a] border rounded-2xl px-6 py-4 flex items-start gap-4 transition-all ${
-                  n.isRead ? "border-blue-900/10 opacity-60" : "border-blue-500/20"
+                className={`rounded-2xl px-6 py-4 flex items-start gap-4 transition-all border ${
+                  n.isRead 
+                    ? "border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-black opacity-60" 
+                    : "border-blue-400 dark:border-blue-500/20 bg-blue-50 dark:bg-blue-600/10"
                 }`}
               >
                 <div className="mt-0.5">
                   {n.isRead
-                    ? <CheckCircle2 size={16} className="text-slate-600" />
-                    : <Info size={16} className="text-blue-400" />
+                    ? <CheckCircle2 size={16} className="text-slate-400 dark:text-slate-600" />
+                    : <Info size={16} className="text-blue-600 dark:text-blue-400" />
                   }
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm text-white font-medium">{n.message ?? n.title ?? "Notification"}</p>
+                  <p className="text-sm text-slate-900 dark:text-white font-medium">{n.message ?? n.title ?? "Notification"}</p>
                   {n.createdAt && (
-                    <p className="text-xs text-slate-600 mt-1">
+                    <p className="text-xs text-slate-600 dark:text-slate-500 mt-1">
                       {new Date(n.createdAt).toLocaleString()}
                     </p>
                   )}
